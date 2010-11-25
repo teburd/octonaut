@@ -1,0 +1,12 @@
+Octonaut is a fast socket server library to use with libev.
+
+The goals of octonaut include.
+* Asynchronous DNS lookups
+* Asynchronous abstraction of a Socket Server
+* HTTP/1.1 Server
+* MSGPACK-RPC Server
+* Bindings for several languages, primarily Python!
+* Completely tested on Linux with complete test coverage.
+
+In regards to python bindings, octonaut should include
+* WSGI Container
