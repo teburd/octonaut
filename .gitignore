@@ -1,0 +1,8 @@
+build
+.lock*
+*.pyc
+*.pyo
+*.un~
+*.swp
+*.pt.py
+
