@@ -20,6 +20,7 @@
  * THE SOFTWARE.
  */
 
+#include <stdlib.h>
 #include <inttypes.h>
 #include <ev.h>
 
