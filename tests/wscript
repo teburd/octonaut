@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 def build(bld):
-    bld.program(
+    bld(
+        features='c cprogram test',
         source = 'octonaut_tests.c',
         target = 'octonaut_tests',
         use = ['check', 'ev', 'octonaut'])

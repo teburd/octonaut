@@ -8,12 +8,16 @@ top = '.'
 import waflib.Configure
 waflib.Configure.autoconfig = True
 
+from waflib.Tools import waf_unit_test
+
 def options(opt):
     opt.load('compiler_c')
+    opt.load('waf_unit_test')
     opt.load('gnu_dirs')
 
 def configure(conf):
     conf.load('compiler_c')
+    conf.load('waf_unit_test')
     conf.env.append_value('CFLAGS', '-Wall -pedantic -std=c99 -g'.split())
     conf.check_cc(lib='ev', uselib_store='ev', mandatory=True)
     conf.check_cc(lib='check', uselib_store='check', mandatory=False)
@@ -21,3 +25,7 @@ def configure(conf):
 def build(bld):
     bld.recurse('octonaut')
     bld.recurse('tests')
+    bld.add_post_fun(waf_unit_test.summary)
+    bld.options.all_tests = True
+
+
