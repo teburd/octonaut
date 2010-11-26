@@ -3,7 +3,7 @@
 /**
  * initialize a Protocol struct
  */
-void protocol_init(Protocol* protocol)
+void octo_protocol_init(octo_protocol *p)
 {
 }
 
@@ -12,30 +12,30 @@ void protocol_init(Protocol* protocol)
  *
  * NOTE: Does not free the struct
  */
-void protocol_destroy(Protocol* protocol)
+void octo_protocol_destroy(octo_protocol *p)
 {
 }
 
 /**
  * callback to a Protocol that it has been connected
  */
-void protocol_connected(Protocol* protocol, SocketIOAddress* address)
+void octo_protocol_connected(octo_protocol *p, octo_aio_address *a)
 {
-    protocol->connected(protocol, address);
+    p->connected(p, a);
 }
 
 /**
  * callback to a Protocol that data has been received
  */
-void protocol_recv(Protocol* protocol, uint8_t* data, size_t len)
+void octo_protocol_data(octo_protocol *p, uint8_t *data, size_t len)
 {
-    protocol->recv(protocol, data, len);
+    p->data(p, data, len);
 }
 
 /**
  * callback to a Protocol that it has been disconnected
  */
-void protocol_disconnected(Protocol* protocol, SocketIOError* error)
+void octo_protocol_disconnected(octo_protocol *p, octo_aio_error *e)
 {
-    protocol->disconnected(protocol, error);
+    p->disconnected(p, e);
 }

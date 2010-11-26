@@ -2,6 +2,6 @@
 
 def build(bld):
     bld.program(
-        source = 'test_transport.c',
-        target = 'test_transport',
-        use = 'CHECK')
+        source = 'octonaut_tests.c',
+        target = 'octonaut_tests',
+        use = ['check', 'ev', 'octonaut'])

@@ -22,10 +22,9 @@
 
 /**
  * Automatic resizing byte buffer with reference counts and single
- * reader/writter semantics.
+ * writter multiple reader semantics, may be piped.
  */
-typedef struct Buffer;
+typedef struct buffer;
 
-
-void buffer_refinc(Buffer* buffer);
-void buffer_refdec(Buffer* buffer);
+void buffer_refinc(buffer *b);
+void buffer_refdec(buffer *b);

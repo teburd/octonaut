@@ -20,32 +20,26 @@
  * THE SOFTWARE.
  */
 
-#include <ev.h>
+#include <stdlib.h>
+
+#include "aio.h"
 
 /**
- * SocketIO
- *
- * Provides intelligently buffered non-blocking IO.
- * Buffers on write only when needed otherwise simply writes directly to the
- * socket.
+ * callback given to ev_io to be called when the
+ * file descriptor is readable.
  */
-typedef (void*)(socketio_write)(SocketIO* socketio, uint8_t* data, size_t len);
-typedef (void*)(socketio_read)(SocketIO* socketio, uint8_t* data, size_t len);
-typedef (void*)(socketio_close)(SocketIO* socketio, SocketIOError* error);
+static void octo_aio_readable(EV_P_ ev_io *watcher, int revents)
+{
+    octo_aio *a = (octo_aio*)watcher->data;
+}
 
-
-typedef struct {
-    ev_loop* loop;
-    ev_io* read_watcher;
-    ev_io* write_watcher;
-    size_t buffer_size;
-    uint8_t* buffer;
-} SocketIO;
-
-void socketio_init(SocketIO* socketio, ev_loop* loop, size_t buffer_size);
-void socketio_destroy(SocketIO* socketio);
-
-void socketio_start(SocketIO* socketio);
-void socketio_stop(SocketIO* socketio);
-void socketio_write(SocketIO* socketio, uint8_t* data, size_t len);
-void socketio_close(SocketIO* socketio);
+void octo_aio_init(octo_aio *s, struct ev_loop *loop, int fd, size_t buffer_size)
+{
+    s->loop = loop;
+    s->buffer_size = buffer_size;
+    s->buffer = malloc(buffer_size);
+    s->fd = fd;
+    
+    ev_io_init( &s->read_watcher, octo_aio_readable, s->fd, EV_READ);
+    ev_io_init( &s->write_watcher, octo_aio_readable, s->fd, EV_WRITE);
+}

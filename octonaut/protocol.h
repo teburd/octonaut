@@ -20,41 +20,42 @@
  * THE SOFTWARE.
  */
 
-#include "socketio.h"
+#include "aio.h"
 
 
 /**
  * Protocol handler
  *
- * Takes a fixed set of possible callbacks to handle events from a socketio.
- * May send things back on the socketio.
+ * Takes a fixed set of possible callbacks to handle events from a octo_aio.
+ * May send things back on the octo_aio.
  */
-typedef (void*)(protocol_connected)(Protocol* protocol, SocketIOAddress* address);
-typedef (void*)(protocol_data)(Protocol* protocol, uint8_t* data, size_t len);
-typedef (void*)(protocol_disconnected)(Protocol* protocol, SocketIOError* error);
+typedef struct octo_protocol octo_protocol;
+typedef void (*octo_protocol_connected_cb) (octo_protocol *p, octo_aio_address *a);
+typedef void (*octo_protocol_data_cb) (octo_protocol *p, uint8_t *data, size_t len);
+typedef void (*octo_protocol_disconnected_cb)(octo_protocol* p, octo_aio_error *e);
 
-typedef struct {
-    protocol_connected connected;
-    protocol_data data;
-    protocol_disconnected disconnected;
-    SocketIO socketio;
-} Protocol;
+struct octo_protocol {
+    octo_protocol_connected_cb connected;
+    octo_protocol_data_cb data;
+    octo_protocol_disconnected_cb disconnected;
+    octo_aio io;
+};
 
 /**
  * Protocol Factory
  *
- * Call to build a protocol object.
+ * Call to build a octo_protocol object.
  */
-typedef (Protocol*)(protocol_factory_buid)(Loop* loop);
+typedef octo_protocol * (*octo_protocol_factory_build) ();
 
-typedef struct {
-    protocol_factory_build build;
-} ProtocolFactory;
+typedef struct octo_protocol_factory {
+    octo_protocol_factory_build build;
+} octo_protocol_factory; 
 
 
-void protocol_init(Protocol* protocol);
-void protocol_destroy(Protocol* protocol);
+void octo_protocol_init(octo_protocol *p);
+void octo_protocol_destroy(octo_protocol *p);
 
-void protocol_connected(Protocol* protocol, SocketIOAddress* address);
-void protocol_data(Protocol* protocol, uint8_t* data, size_t len);
-void protocol_disconnected(Protocol* protocol, SocketIOError* error);
+void octo_protocol_connected(octo_protocol *p, octo_aio_address *a);
+void octo_protocol_data(octo_protocol *p, uint8_t *data, size_t len);
+void octo_protocol_disconnected(octo_protocol *p, octo_aio_error *e);
