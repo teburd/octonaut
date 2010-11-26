@@ -15,6 +15,7 @@ def options(opt):
 def configure(conf):
     conf.load('compiler_c')
     conf.check_cc(lib='ev', uselib_store='EV', mandatory=True)
+    conf.check_cc(lib='check', uselib_store='CHECK', mandatory=False)
 
 def build(bld):
     bld.recurse('octonaut')

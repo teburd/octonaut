@@ -3,4 +3,5 @@
 def build(bld):
     bld.program(
         source = 'test_transport.c',
-        target = 'test_transport')
+        target = 'test_transport',
+        use = 'CHECK')
