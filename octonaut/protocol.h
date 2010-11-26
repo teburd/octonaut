@@ -22,26 +22,39 @@
 
 #include "socketio.h"
 
-typedef struct {
 
+/**
+ * Protocol handler
+ *
+ * Takes a fixed set of possible callbacks to handle events from a socketio.
+ * May send things back on the socketio.
+ */
+typedef (void*)(protocol_connected)(Protocol* protocol, SocketIOAddress* address);
+typedef (void*)(protocol_data)(Protocol* protocol, uint8_t* data, size_t len);
+typedef (void*)(protocol_disconnected)(Protocol* protocol, SocketIOError* error);
+
+typedef struct {
+    protocol_connected connected;
+    protocol_data data;
+    protocol_disconnected disconnected;
+    SocketIO socketio;
 } Protocol;
 
-typedef (void*)(protocol_connected)(Protocol* protocol, SocketAddress* address);
-typedef (void*)(protocol_data)(Protocol* protocol, uint8_t* data, size_t len);
-typedef (void*)(protocol_disconnected)(Protocol* protocol, SocketError* error);
-
-
-typedef struct {
-
-} ProtocolFactory;
-
+/**
+ * Protocol Factory
+ *
+ * Call to build a protocol object.
+ */
 typedef (Protocol*)(protocol_factory_buid)(Loop* loop);
 
-void protocol_init(Protocol* protocol, protocol_connected connected,
-    protocol_disconnected disconnected, protocol_data data);
+typedef struct {
+    protocol_factory_build build;
+} ProtocolFactory;
 
+
+void protocol_init(Protocol* protocol);
 void protocol_destroy(Protocol* protocol);
 
-void protocol_connected(Protocol* protocol, SocketAddress* address);
+void protocol_connected(Protocol* protocol, SocketIOAddress* address);
 void protocol_data(Protocol* protocol, uint8_t* data, size_t len);
-void protocol_disconnected(Protocol* protocol, SocketError* error);
+void protocol_disconnected(Protocol* protocol, SocketIOError* error);

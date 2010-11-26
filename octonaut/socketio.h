@@ -20,14 +20,32 @@
  * THE SOFTWARE.
  */
 
-#include "protocol.h"
+#include <ev.h>
 
 /**
- * HTTP Protocol
+ * SocketIO
+ *
+ * Provides intelligently buffered non-blocking IO.
+ * Buffers on write only when needed otherwise simply writes directly to the
+ * socket.
  */
-typedef struct
-{
-    Protocol protocol
-} HTTPProtocol;
+typedef (void*)(socketio_write)(SocketIO* socketio, uint8_t* data, size_t len);
+typedef (void*)(socketio_read)(SocketIO* socketio, uint8_t* data, size_t len);
+typedef (void*)(socketio_close)(SocketIO* socketio, SocketIOError* error);
 
 
+typedef struct {
+    ev_loop* loop;
+    ev_io* read_watcher;
+    ev_io* write_watcher;
+    size_t buffer_size;
+    uint8_t* buffer;
+} SocketIO;
+
+void socketio_init(SocketIO* socketio, ev_loop* loop, size_t buffer_size);
+void socketio_destroy(SocketIO* socketio);
+
+void socketio_start(SocketIO* socketio);
+void socketio_stop(SocketIO* socketio);
+void socketio_write(SocketIO* socketio, uint8_t* data, size_t len);
+void socketio_close(SocketIO* socketio);

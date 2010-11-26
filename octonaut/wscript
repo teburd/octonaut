@@ -2,5 +2,5 @@
 
 def build(bld):
     bld.stlib(
-        source = '',
+        source = 'protocol.c',
         target = 'octonaut')
