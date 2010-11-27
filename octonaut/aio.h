@@ -54,9 +54,9 @@ typedef struct octo_aio_address
  * directly to the socket.
  */
 typedef struct octo_aio octo_aio;
-typedef void (*octo_aio_write_cb) (octo_aio *s, uint8_t *data, size_t len);
-typedef void (*octo_aio_read_cb) (octo_aio *s, uint8_t *data, size_t len);
-typedef void (*octo_aio_close_cb) (octo_aio *s, octo_aio_error *error);
+typedef void (*octo_aio_write_cb) (void *ctx, uint8_t *data, size_t len);
+typedef void (*octo_aio_read_cb) (void *ctx, uint8_t *data, size_t len);
+typedef void (*octo_aio_close_cb) (void *ctx, octo_aio_error *error);
 
 struct octo_aio {
     struct ev_loop *loop;
@@ -64,8 +64,11 @@ struct octo_aio {
     ev_io read_watcher;
     ev_io write_watcher;
     octo_aio_write_cb write;
+    void *write_ctx;
     octo_aio_read_cb read;
+    void *read_ctx;
     octo_aio_close_cb close;
+    void *close_ctx;
     size_t buffer_size;
     uint8_t *buffer;
 };

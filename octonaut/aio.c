@@ -22,6 +22,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "aio.h"
 
@@ -31,7 +33,14 @@
  */
 static void octo_aio_readable(EV_P_ ev_io *watcher, int revents)
 {
+    printf("got read\n");
     octo_aio *aio = (octo_aio*)watcher->data;
+    size_t len = 0;
+    size_t maxlen = 4096;
+    uint8_t buffer[maxlen];
+    
+    len = read(aio->fd, buffer, maxlen);
+    aio->read(aio->read_ctx, buffer, len);
 }
 
 void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd, size_t buffer_size)
@@ -40,6 +49,7 @@ void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd, size_t buffer_si
     aio->buffer_size = buffer_size;
     aio->buffer = malloc(buffer_size);
     aio->fd = fd;
+    fcntl(aio->fd, F_SETFL, O_NONBLOCK);
     
     aio->read_watcher.data = aio;
     aio->write_watcher.data = aio;
@@ -60,7 +70,9 @@ void octo_aio_destroy(octo_aio *aio)
 
 void octo_aio_start(octo_aio *aio)
 {
+    printf("starting\n");
     ev_io_start(aio->loop, &aio->read_watcher);
+    printf("started\n");
 }
 
 void octo_aio_stop(octo_aio *aio)
