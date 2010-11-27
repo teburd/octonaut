@@ -10,13 +10,17 @@ START_TEST (test_octo_aio_create)
     int fd = fileno(stdin);
     octo_aio_init(&aio, loop, fd, 128); 
     
-    fail_unless(aio.buffer_size == 128);
-    fail_unless(aio.fd == fd);
+    fail_unless(aio.buffer_size == 128,
+        "buffer size not set correctly by aio_init");
+    fail_unless(aio.fd == fd,
+        "fd not set correctly by aio_init");
 
     octo_aio_destroy(&aio);
 
-    fail_unless(aio.buffer_size == 0);
-    fail_unless(aio.fd == -1);
+    fail_unless(aio.buffer_size == 0,
+        "buffer_size not reset by aio_destroy");
+    fail_unless(aio.fd == -1,
+        "fd not reset by aio_destroy");
 }
 END_TEST
 
@@ -72,14 +76,16 @@ START_TEST (test_octo_aio_pipe)
     read_len = read(pipefds[0], buffer, msg_len);
 
     /* sanity check on the pipe */
-    fail_unless(read_len == msg_len);
+    fail_unless(read_len == msg_len,
+        "message read from pipe not the length of the message, pipe error?");
 
     /* use the octo_aio as a read watcher on the pipe
      * with our mock_rw_cb which counts bytes
      */
     write(pipefds[1], msg, msg_len);
     ev_run(loop, EVRUN_ONCE);
-    fail_unless(ctx.byte_count == msg_len);
+    fail_unless(ctx.byte_count == msg_len,
+        "message read from pipe using aio not hte length of the message.");
 
 }
 END_TEST
