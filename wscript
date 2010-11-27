@@ -23,7 +23,7 @@ def options(opt):
 def configure(conf):
     conf.load('compiler_c')
     conf.load('waf_unit_test')
-    conf.env.append_value('CFLAGS', '-Wall -pedantic -std=c99 -g'.split())
+    conf.env.append_value('CFLAGS', '-Wall -pedantic -std=gnu99 -g'.split())
     conf.check_cc(lib='ev', uselib_store='ev', mandatory=True)
     conf.check_cc(lib='check', uselib_store='check', mandatory=False)
 

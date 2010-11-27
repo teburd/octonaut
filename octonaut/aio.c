@@ -33,7 +33,6 @@
  */
 static void octo_aio_readable(EV_P_ ev_io *watcher, int revents)
 {
-    printf("got read\n");
     octo_aio *aio = (octo_aio*)watcher->data;
     size_t len = 0;
     size_t maxlen = 4096;
@@ -70,9 +69,7 @@ void octo_aio_destroy(octo_aio *aio)
 
 void octo_aio_start(octo_aio *aio)
 {
-    printf("starting\n");
     ev_io_start(aio->loop, &aio->read_watcher);
-    printf("started\n");
 }
 
 void octo_aio_stop(octo_aio *aio)

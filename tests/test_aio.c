@@ -1,15 +1,22 @@
 #include "aio.h"
-
+#include <stdio.h>
 
 START_TEST (test_octo_aio_create)
 {
     octo_aio aio;
 
     struct ev_loop *loop = EV_DEFAULT;
+   
+    int fd = fileno(stdin);
+    octo_aio_init(&aio, loop, fd, 128); 
     
-    octo_aio_init(&aio, loop, (size_t)stdin, 128); 
+    fail_unless(aio.buffer_size == 128);
+    fail_unless(aio.fd == fd);
 
     octo_aio_destroy(&aio);
+
+    fail_unless(aio.buffer_size == 0);
+    fail_unless(aio.fd == -1);
 }
 END_TEST
 
@@ -46,38 +53,33 @@ START_TEST (test_octo_aio_pipe)
     const char* msg = "suck it trabek";
     size_t msg_len = strlen(msg);
     char buffer[msg_len];
+    size_t read_len = 0;
     mock_ctx ctx;
     ctx.byte_count = 0;
 
     struct ev_loop *loop = EV_DEFAULT;
 
-    printf("creating pipes\n");
-    if(pipe(pipefds) == -1)
-    {
-        perror("pipe");
-        exit(EXIT_FAILURE);
-    }
+    fail_unless(pipe(pipefds) != -1);
 
-    printf("initialize\n");
     octo_aio_init(&aios[0], loop, pipefds[0], 128);
     octo_aio_init(&aios[1], loop, pipefds[1], 128);
    
-    printf("starting 0\n");
     aios[0].read = mock_rw_cb;
     aios[0].read_ctx = &ctx;
     octo_aio_start(&aios[0]);
 
-    printf("writting\n");
     write(pipefds[1], msg, msg_len);
-    read(pipefds[0], buffer, msg_len);
-    printf("read %s\n", buffer);
-    write(pipefds[1], msg, msg_len);
+    read_len = read(pipefds[0], buffer, msg_len);
 
-    printf("running\n");
+    /* sanity check on the pipe */
+    fail_unless(read_len == msg_len);
+
+    /* use the octo_aio as a read watcher on the pipe
+     * with our mock_rw_cb which counts bytes
+     */
+    write(pipefds[1], msg, msg_len);
     ev_run(loop, EVRUN_ONCE);
-
-    /* assert that the current read count is greater than 1 */
-    printf("pipe got %d bytes\n", ctx.byte_count);
+    fail_unless(ctx.byte_count == msg_len);
 
 }
 END_TEST
