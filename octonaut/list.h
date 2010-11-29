@@ -1,9 +1,10 @@
 #ifndef LIST_H
 #define LIST_H
 
-struct list_head {
-	struct list_head *next, *prev;
-};
+typedef struct list_head {
+    struct list_head *next;
+    struct list_head *prev;
+} list_head;
 
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
 
@@ -166,6 +167,8 @@ static inline void list_splice_init(struct list_head *list,
 
 /**
  * list_entry - get the struct for this entry
+ *
+ *
  * @ptr:	the &struct list_head pointer.
  * @type:	the type of the struct this is embedded in.
  * @member:	the name of the list_struct within the struct.
