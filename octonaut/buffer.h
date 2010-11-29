@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "list.h"
 
 /**
  * Buffer Item
@@ -40,7 +41,7 @@ struct octo_buffer_item
 
 typedef struct octo_buffer
 {
-    octo_list *buffer_list;
+    octo_list buffer_list;
     size_t size;
     size_t items; 
 } octo_buffer;

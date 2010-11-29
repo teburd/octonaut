@@ -40,7 +40,7 @@ typedef enum _octo_log_level
 
 typedef struct octo_log_output
 {
-    struct list_head list;
+    octo_list list;
     bool colorize;
     FILE* stream;
 } octo_log_output;
@@ -49,7 +49,7 @@ typedef struct octo_logger
 {
     char *name;
     octo_log_level level;
-    octo_log_output outs[4];
+    octo_list outs[4];
 } octo_logger;
 
 void octo_logger_init(octo_logger *lgr, const char *name);

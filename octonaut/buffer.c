@@ -24,13 +24,13 @@
 
 void octo_buffer_init(octo_buffer *b)
 {
-    b->head = NULL;
+    octo_list_init(&b->buffer_list);
     b->size = 0;
 }
 
 void octo_buffer_destroy(octo_buffer *b)
 {
-    b->head = NULL;
+    octo_list_destroy(&b->buffer_list);
     b->size = 0;
 }
 

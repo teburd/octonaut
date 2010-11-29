@@ -42,16 +42,26 @@ struct octo_list {
 /**
  * initialize octo_list prev/next pointers
  */
-static inline void octo_list_init(octo_list *l, octo_list *n, octo_list *p)
+static inline void octo_list_init(octo_list *l)
 {
-    l->next = n;
-    l->prev = p;
+    l->next = l;
+    l->prev = l;
+}
+
+/**
+ * destroy the octo_list
+ *
+ * really just reinitializes the list
+ */
+static inline void octo_list_destroy(octo_list *l)
+{
+    octo_list_init(l);
 }
 
 /**
  * insert a new octo_list * in between the prev and next octo_list *
  */
-static inline void octo_list_insert(octo_list *new, octo_list *prev,
+static inline void _octo_list_insert(octo_list *new, octo_list *prev,
     octo_list *next)
 {
 	next->prev = new;
@@ -63,17 +73,66 @@ static inline void octo_list_insert(octo_list *new, octo_list *prev,
 /**
  * append an item to the list right after the given one
  */
-static inline void octo_list_append(octo_list *new, octo_list *existing)
+static inline void _octo_list_append(octo_list *list, octo_list *item)
 {
-    octo_list_insert(new, existing, existing->next);
+    _octo_list_insert(item, list, list->next);
 }
 
 /**
  * prepend an item to the list right before the given one
  */
-static inline void octo_list_prepend(octo_list *new, octo_list *existing)
+static inline void _octo_list_prepend(octo_list *list, octo_list *item)
 {
-    octo_list_insert(new, existing->prev, existing);
+    _octo_list_insert(item, list->prev, list);
+}
+
+/**
+ * add an item to the list in no particular way
+ */
+static inline void octo_list_add(octo_list *list, octo_list *item)
+{
+    _octo_list_append(list, item);
+}
+
+/**
+ * prepend an item to the head of the list
+ *
+ * this is actually the same as add
+ */
+static inline void octo_list_prepend(octo_list *list, octo_list *item)
+{
+    _octo_list_append(list, item);
+}
+
+/**
+ * append an item to the tail of the list
+ */
+static inline void octo_list_append(octo_list *list, octo_list *item)
+{
+    octo_list *pos = list->next;
+    octo_list *last = pos;
+
+    while(pos != NULL)
+    {
+        last = pos;
+        pos = pos->next;
+    }
+
+    _octo_list_append(last, item);
+
+}
+
+/**
+ * remove an item from the list
+ */
+static inline void octo_list_remove(octo_list *item)
+{
+    octo_list *next = item->next;
+    octo_list *prev = item->prev;
+    prev->next = next;
+    next->prev = prev;
+    item->next = item;
+    item->prev = item;
 }
 
 /**

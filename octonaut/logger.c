@@ -40,7 +40,7 @@ void octo_logger_init(octo_logger *lgr, const char *name)
 
     for(i = 0; i < 4; ++i)
     {
-        INIT_LIST_HEAD(&lgr->outs[i].list);
+        octo_list_init(&lgr->outs[i]);
     }
 }
 
@@ -49,18 +49,20 @@ void octo_logger_init(octo_logger *lgr, const char *name)
  */
 void octo_logger_destroy(octo_logger *lgr)
 {
-    struct list_head *pos, *q;
     int i = 0;
 
     for(i = 0; i < 4; ++i)
     {
-        list_for_each_safe(pos, q, &lgr->outs[i].list)
+        octo_log_output *output;
+        octo_log_output *next;
+
+        octo_list_foreach(output, next, &lgr->outs[i], list)
         {
-            octo_log_output *lo = list_entry(pos, octo_log_output, list);
-            list_del(pos);
-            fclose(lo->stream);
-            free(lo);
+            octo_list_remove(&output->list);
+            fclose(output->stream);
+            free(output);
         }
+
     }
 
     free(lgr->name);
@@ -87,8 +89,8 @@ void octo_logger_add_output(octo_logger *lgr, octo_log_level level, int fd, bool
     octo_log_output *out = malloc(sizeof(octo_log_output));
     out->stream = fdopen(dup(fd), "a+");
     out->colorize = colorize;
-    INIT_LIST_HEAD(&out->list);
-    list_add(&out->list, &lgr->outs[level].list);
+    octo_list_init(&out->list);
+    octo_list_add(&lgr->outs[level], &out->list);
 }
 
 /**
@@ -123,7 +125,6 @@ void octo_logger_log(octo_logger *lgr, octo_log_level level, const char *where, 
     static char buf[80]; /* allocate a single one time buffer for time printouts */
     time_t now;
     struct tm *ts;
-    struct list_head *pos, *q;
     va_list args;
     va_start(args, fmt);
 
@@ -133,21 +134,20 @@ void octo_logger_log(octo_logger *lgr, octo_log_level level, const char *where, 
         now = time(NULL);
         ts = localtime(&now);
         strftime(buf, sizeof(buf), "%a %Y-%m-%d %H:%M:%S %Z", ts);
-
-        list_for_each_safe(pos, q, &lgr->outs[level].list)
+    
+        octo_log_output *output;
+        octo_log_output *next;
+        octo_list_foreach(output, next, &lgr->outs[level], list)
         {
-            octo_log_output *lo = list_entry(pos, octo_log_output, list);
-            
-
-            if(lo->colorize)
+            if(output->colorize)
             {
-                fprintf(lo->stream, "[");
-                textcolor(lo->stream, BRIGHT, MAGENTA, BLACK);
-                fprintf(lo->stream, "%s", lgr->name);
-                textcolor(lo->stream, RESET, WHITE, BLACK);
-                fprintf(lo->stream, "]");
+                fprintf(output->stream, "[");
+                textcolor(output->stream, BRIGHT, MAGENTA, BLACK);
+                fprintf(output->stream, "%s", lgr->name);
+                textcolor(output->stream, RESET, WHITE, BLACK);
+                fprintf(output->stream, "]");
 
-                fprintf(lo->stream, "[");
+                fprintf(output->stream, "[");
                 if(level == LOG_DEBUG)
                     color = GREEN;
                 else if(level == LOG_INFO)
@@ -156,20 +156,20 @@ void octo_logger_log(octo_logger *lgr, octo_log_level level, const char *where, 
                     color = YELLOW;
                 else if(level == LOG_ERROR)
                     color = RED;
-                textcolor(lo->stream, BRIGHT, color, BLACK);
-                fprintf(lo->stream, "%5s", LVLSTR[level]);
-                textcolor(lo->stream, RESET, WHITE, BLACK);
-                fprintf(lo->stream, " %18s]", where);
+                textcolor(output->stream, BRIGHT, color, BLACK);
+                fprintf(output->stream, "%5s", LVLSTR[level]);
+                textcolor(output->stream, RESET, WHITE, BLACK);
+                fprintf(output->stream, " %18s]", where);
             }
             else
             {
-                fprintf(lo->stream, "[%5s - %18s]", LVLSTR[level], where);
+                fprintf(output->stream, "[%5s - %18s]", LVLSTR[level], where);
             }
 
-            fprintf(lo->stream, " :: %s :: ", buf);
-            vfprintf(lo->stream, fmt, args);
-            fprintf(lo->stream, "\n");
-            fflush(lo->stream);
+            fprintf(output->stream, " :: %s :: ", buf);
+            vfprintf(output->stream, fmt, args);
+            fprintf(output->stream, "\n");
+            fflush(output->stream);
         }
     }
     va_end(args);
