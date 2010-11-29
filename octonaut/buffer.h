@@ -35,15 +35,14 @@ struct octo_buffer_item
     bool free_data;
     size_t size;
     uint8_t *data;
-    octo_buffer_item *next;
-    octo_buffer_item *prev;
+    octo_list list;
 };
-
 
 typedef struct octo_buffer
 {
-    octo_buffer_item *head;
+    octo_list *buffer_list;
     size_t size;
+    size_t items; 
 } octo_buffer;
 
 void octo_buffer_init(octo_buffer *b);
