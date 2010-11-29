@@ -20,6 +20,9 @@
  * THE SOFTWARE.
  */
 
+#ifndef OCTO_PROTOCOL_H
+#define OCTO_PROTOCOL_H
+
 #include "aio.h"
 
 
@@ -59,3 +62,5 @@ void octo_protocol_destroy(octo_protocol *p);
 void octo_protocol_connected(octo_protocol *p, octo_aio_address *a);
 void octo_protocol_data(octo_protocol *p, uint8_t *data, size_t len);
 void octo_protocol_disconnected(octo_protocol *p, octo_aio_error *e);
+
+#endif
