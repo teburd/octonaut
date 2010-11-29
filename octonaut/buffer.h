@@ -21,10 +21,22 @@
  */
 
 /**
- * Automatic resizing byte buffer with reference counts and single
- * writter multiple reader semantics, may be piped.
+ * Buffer that acts very much like file descriptors do.
+ * May provide copy-free or copy semantics.
  */
-typedef struct buffer;
+typedef struct buffer
+{
+    bool free_data;
+    size_t size;
+    uint8_t *data;
+    buffer *next;
+    buffer *previous;
+} buffer;
 
-void buffer_refinc(buffer *b);
-void buffer_refdec(buffer *b);
+void buffer_init(buffer *b);
+size_t buffer_write_nocopy(buffer *b, uint8_t *data, size_t len, bool free_data);
+size_t buffer_write_copy(buffer *b, uint8_t *data, size_t len);
+size_t buffer_read_nocopy(buffer *b, uint8_t *data, size_t len);
+size_t buffer_read_copy(buffer *b, uint8_t *data, size_t len);
+size_t buffer_peek_nocopy(buffer *b, uint8_t *data, size_t len);
+size_t buffer_peek_copy(buffer *b, uint8_t *data, size_t len);

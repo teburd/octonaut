@@ -42,6 +42,14 @@ static void octo_aio_readable(EV_P_ ev_io *watcher, int revents)
     aio->read(aio->read_ctx, buffer, len);
 }
 
+/**
+ * callback given to ev_io to be called when the file descriptor is
+ * writtable.
+ */
+static void octo_aio_writtable(EV_P_ ev_io *watcher, int revents)
+{
+}
+
 void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd, size_t buffer_size)
 {
     aio->loop = loop;
@@ -75,4 +83,9 @@ void octo_aio_start(octo_aio *aio)
 void octo_aio_stop(octo_aio *aio)
 {
     ev_io_stop(aio->loop, &aio->read_watcher);
+}
+
+void octo_aio_write(octo_aio *s, uint8_t *data, size_t len)
+{
+    s->write(s->write_ctx, data, len);
 }
