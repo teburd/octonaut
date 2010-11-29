@@ -10,11 +10,6 @@ waflib.Configure.autoconfig = True
 
 from waflib import Logs
 
-def test_summary(bld):
-    test_results = getattr(bld, 'utest_results', [])
-    for test_result in test_results:
-        Logs.pprint('CYAN', test_result[2])
-
 def options(opt):
     opt.load('compiler_c')
     opt.load('waf_unit_test')
@@ -30,7 +25,6 @@ def configure(conf):
 def build(bld):
     bld.recurse('octonaut')
     bld.recurse('tests')
-    bld.add_post_fun(test_summary)
     bld.options.all_tests = True
 
 

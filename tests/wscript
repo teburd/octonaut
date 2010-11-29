@@ -2,7 +2,7 @@
 
 def build(bld):
     bld(
-        features='c cprogram test',
+        features='c cprogram',
         source = 'octonaut_tests.c',
         target = 'octonaut_tests',
         use = ['check', 'ev', 'octonaut'])
