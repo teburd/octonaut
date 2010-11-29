@@ -21,7 +21,8 @@
  */
 
 #include <stdlib.h>
-#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <ev.h>
 
 /**
