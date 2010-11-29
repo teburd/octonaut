@@ -20,8 +20,21 @@
  * THE SOFTWARE.
  */
 
-#include "protocol.h"
+#include "buffer.h"
 
+void octo_buffer_init(octo_buffer *b)
+{
+    b->head = NULL;
+    b->size = 0;
+}
 
-void octo_server_init(octo_server *s);
-void octo_server_destroy(octo_server *s);
+void octo_buffer_destroy(octo_buffer *b)
+{
+    b->head = NULL;
+    b->size = 0;
+}
+
+size_t octo_buffer_size(const octo_buffer *b)
+{
+    return b->size;
+}

@@ -2,6 +2,6 @@
 
 def build(bld):
     bld.stlib(
-        source = ['protocol.c', 'aio.c'],
+        source = ['protocol.c', 'aio.c', 'buffer.c'],
         target = 'octonaut',
         export_includes = ".")

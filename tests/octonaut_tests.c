@@ -5,11 +5,14 @@
 #include <ev.h>
 #include <check.h>
 
+#include "test_buffer.c"
 #include "test_aio.c"
+
 
 Suite* octonaut_suite(void)
 {
     Suite *s = suite_create("octonaut");
+    suite_add_tcase(s, octo_buffer_tcase()); 
     suite_add_tcase(s, octo_aio_tcase()); 
     return s;
 }

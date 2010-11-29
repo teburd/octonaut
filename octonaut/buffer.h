@@ -20,23 +20,65 @@
  * THE SOFTWARE.
  */
 
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 /**
- * Buffer that acts very much like file descriptors do.
- * May provide copy-free or copy semantics.
+ * Buffer Item
  */
-typedef struct buffer
+
+typedef struct octo_buffer_item octo_buffer_item;
+
+struct octo_buffer_item
 {
     bool free_data;
     size_t size;
     uint8_t *data;
-    buffer *next;
-    buffer *previous;
-} buffer;
+    octo_buffer_item *next;
+    octo_buffer_item *prev;
+};
 
-void buffer_init(buffer *b);
-size_t buffer_write_nocopy(buffer *b, uint8_t *data, size_t len, bool free_data);
-size_t buffer_write_copy(buffer *b, uint8_t *data, size_t len);
-size_t buffer_read_nocopy(buffer *b, uint8_t *data, size_t len);
-size_t buffer_read_copy(buffer *b, uint8_t *data, size_t len);
-size_t buffer_peek_nocopy(buffer *b, uint8_t *data, size_t len);
-size_t buffer_peek_copy(buffer *b, uint8_t *data, size_t len);
+
+typedef struct octo_buffer
+{
+    octo_buffer_item *head;
+    size_t size;
+} octo_buffer;
+
+void octo_buffer_init(octo_buffer *b);
+void octo_buffer_destroy(octo_buffer *b);
+
+/**
+ * information about the buffer
+ */
+size_t octo_buffer_size(const octo_buffer *b);
+size_t octo_buffer_items(const octo_buffer *b);
+
+/**
+ * write to the buffer from some other location, copies only if explicitly told
+ * to do so.
+ *
+ * return the actual number of bytes written.
+ */
+size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len, bool free_data);
+size_t octo_buffer_write_copy(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_write_file(octo_buffer *b, int fd, size_t len);
+
+/**
+ * read from the buffer to some other location, copies only if explicitly told
+ * to do so.
+ *
+ * return the actual number of bytes read.
+ */
+size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_read_copy(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_read_file(octo_buffer *b, int fd, size_t len);
+
+/**
+ * peek in to the buffer (like reading but does not remove bytes)
+ *
+ * return the actual number of bytes read.
+ */
+size_t octo_buffer_peek(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_peek_copy(octo_buffer *b, uint8_t *data, size_t len);
