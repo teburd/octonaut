@@ -25,19 +25,12 @@
 #include <stdint.h>
 #include "list.h"
 
-/**
- * Buffer Item
- */
-
-typedef struct octo_buffer_item octo_buffer_item;
-
 struct octo_buffer_item
 {
-    bool free_data;
     size_t size;
     uint8_t *data;
     octo_list list;
-};
+} octo_buffer_item;
 
 typedef struct octo_buffer
 {
@@ -56,29 +49,31 @@ size_t octo_buffer_size(const octo_buffer *b);
 size_t octo_buffer_items(const octo_buffer *b);
 
 /**
- * write to the buffer from some other location, copies only if explicitly told
- * to do so.
+ * write to the buffer from some other location at most len bytes.
+ *
+ * copies at most len bytes from data or fd (file).
  *
  * return the actual number of bytes written.
  */
-size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len, bool free_data);
-size_t octo_buffer_write_copy(octo_buffer *b, uint8_t *data, size_t len);
-size_t octo_buffer_write_file(octo_buffer *b, int fd, size_t len);
+size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_fwrite(octo_buffer *b, int fd, size_t len);
 
 /**
- * read from the buffer to some other location, copies only if explicitly told
- * to do so.
+ * read from the buffer to some other location at most len bytes.
  *
- * return the actual number of bytes read.
+ * copies at most len bytes to data or fd (file).
+ *
+ * returns the actual number of bytes read.
  */
 size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len);
-size_t octo_buffer_read_copy(octo_buffer *b, uint8_t *data, size_t len);
-size_t octo_buffer_read_file(octo_buffer *b, int fd, size_t len);
+size_t octo_buffer_fread(octo_buffer *b, int fd, size_t len);
 
 /**
- * peek in to the buffer (like reading but does not remove bytes)
+ * peek in to the buffer at most len bytes.
+ *
+ * copyies at most len bytes to data. 
+ * does not remove len bytes from buffer.
  *
  * return the actual number of bytes read.
  */
-size_t octo_buffer_peek(octo_buffer *b, uint8_t *data, size_t len);
-size_t octo_buffer_peek_copy(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_peek(const octo_buffer *b, uint8_t *data, size_t len);
