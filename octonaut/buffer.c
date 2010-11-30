@@ -22,6 +22,8 @@
 
 #include "buffer.h"
 
+octo_list free_buffers;
+
 void octo_buffer_init(octo_buffer *b)
 {
     octo_list_init(&b->buffer_list);
@@ -37,4 +39,31 @@ void octo_buffer_destroy(octo_buffer *b)
 size_t octo_buffer_size(const octo_buffer *b)
 {
     return b->size;
+}
+
+size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
+{
+    octo_buffer_item *item;
+
+    if(!octo_list_empty(free_buffers))
+    {
+       item = octo_list_pop(free_buffers); 
+    }
+    else
+    {
+        item = malloc(sizeof(octo_buffer_item) + len);
+    }
+
+    item->size = len;
+    item->start = 0;
+    item->end = len-1;
+    memcpy(item->data, data, len);
+    octo_list_push(b->buffer_list, item->list);
+    return len;
+}
+
+size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
+{
+    octo_buffer_item *item = octo_list_entry(octo_list_tail(b->buffer_list), octo_buffer_item, list);
+    memcpydd
 }

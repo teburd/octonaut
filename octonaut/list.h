@@ -135,6 +135,47 @@ static inline void octo_list_remove(octo_list *item)
     item->prev = item;
 }
 
+
+/**
+ * push an item on to the head of the list
+ */
+static inline void octo_list_push(octo_list *list, octo_list *item)
+{
+    octo_list_add(list, item);
+}
+
+/**
+ * pop an item off the tail of the list
+ *
+ * may return the list itself in the case where the list is empty.
+ */
+static inline octo_list * octo_list_pop(octo_list *list)
+{
+    octo_list *item = list->prev;
+    octo_list_remove(item);
+    return item;
+}
+
+/**
+ * the tail of the list
+ *
+ * may return the list itself in the case where the list is empty.
+ */
+static inline octo_list * octo_list_tail(octo_list *list)
+{
+    return list->prev;
+}
+
+/**
+ * the head of the list
+ *
+ * may return the list itself in the case where the list is empty.
+ */
+static inline octo_list * octo_list_head(octo_list *list)
+{
+    return list->next;
+}
+
 /**
  * The clever little macro that could. Obtains a pointer to the struct
  * that the octo_list is contained in. This is done by subtracting the offset

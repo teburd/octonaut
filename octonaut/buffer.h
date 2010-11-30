@@ -36,9 +36,11 @@
 
 struct octo_buffer_item
 {
-    size_t size;
-    uint8_t *data;
     octo_list list;
+    size_t start;
+    size_t end;
+    size_t size;
+    uint8_t data[];
 } octo_buffer_item;
 
 typedef struct octo_buffer
@@ -48,43 +50,74 @@ typedef struct octo_buffer
     size_t items; 
 } octo_buffer;
 
+/**
+ * initialize the stack buffers
+ */
+void octo_init_buffer();
+
+/**
+ * initialize a buffer
+ */
 void octo_buffer_init(octo_buffer *b);
+
+/**
+ * destroy a buffer
+ */
 void octo_buffer_destroy(octo_buffer *b);
 
 /**
- * information about the buffer
+ * size of the buffer in bytes
  */
 size_t octo_buffer_size(const octo_buffer *b);
+
+/**
+ * number of elements in the buffer
+ */
 size_t octo_buffer_items(const octo_buffer *b);
 
 /**
- * write to the buffer from some other location at most len bytes.
+ * write to the buffer from a memory location at most len bytes
  *
- * copies at most len bytes from data or fd (file).
- *
- * return the actual number of bytes written.
+ * return number of bytes written
  */
 size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len);
+
+/**
+ * write to the buffer from a file descriptor at most len bytes
+ *
+ * return number of bytes written
+ */
 size_t octo_buffer_fwrite(octo_buffer *b, int fd, size_t len);
 
 /**
- * read from the buffer to some other location at most len bytes.
+ * read from the buffer to a memory location at most len bytes.
  *
- * copies at most len bytes to data or fd (file).
- *
- * returns the actual number of bytes read.
+ * return the number of bytes read.
  */
 size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len);
+
+/**
+ * read from the buffer to a file descriptor at most len bytes.
+ *
+ * return the number of bytes read.
+ */
 size_t octo_buffer_fread(octo_buffer *b, int fd, size_t len);
 
 /**
  * peek in to the buffer at most len bytes.
  *
- * copyies at most len bytes to data. 
- * does not remove len bytes from buffer.
+ * same as octo_buffer_read except this does not remove bytes
+ * from the buffer.
  *
  * return the actual number of bytes read.
  */
 size_t octo_buffer_peek(const octo_buffer *b, uint8_t *data, size_t len);
+
+/**
+ * remove from the buffer at most len bytes.
+ *
+ * return the actual number of bytes removed.
+ */
+size_t octo_buffer_drain(octo_buffer *b, size_t len);
 
 #endif
