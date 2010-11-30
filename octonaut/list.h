@@ -55,6 +55,16 @@ static inline void octo_list_init(octo_list *l)
  */
 static inline void octo_list_destroy(octo_list *l)
 {
+    octo_list *pos = l->next;
+    octo_list *cur = l->next;
+
+    while(pos != l)
+    {
+        cur = pos;
+        pos = cur->next;
+        octo_list_init(cur);
+    }
+
     octo_list_init(l);
 }
 
