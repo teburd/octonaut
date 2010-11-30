@@ -119,17 +119,7 @@ static inline void octo_list_prepend(octo_list *list, octo_list *item)
  */
 static inline void octo_list_append(octo_list *list, octo_list *item)
 {
-    octo_list *pos = list->next;
-    octo_list *last = pos;
-
-    while(pos != NULL)
-    {
-        last = pos;
-        pos = pos->next;
-    }
-
-    _octo_list_append(last, item);
-
+    _octo_list_prepend(list, item);
 }
 
 /**
@@ -148,7 +138,8 @@ static inline void octo_list_remove(octo_list *item)
 /**
  * The clever little macro that could. Obtains a pointer to the struct
  * that the octo_list is contained in. This is done by subtracting the offset
- * of the octo_list member from the address of the octo_list memory address.
+ * of the octo_list member from the address of the address of the octo_list 
+ * member.
  */
 #define octo_list_entry(ptr, type, member) \
     ((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
