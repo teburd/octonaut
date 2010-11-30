@@ -22,9 +22,13 @@ def configure(conf):
     conf.check_cc(lib='ev', uselib_store='ev', mandatory=True)
     conf.check_cc(lib='check', uselib_store='check', mandatory=False)
 
+def tests(ctx):
+    ctx.exec_command('./build/tests/octonaut_tests') 
+
 def build(bld):
     bld.recurse('octonaut')
     bld.recurse('tests')
     bld.options.all_tests = True
+    bld.add_post_fun(tests)
 
 
