@@ -34,12 +34,12 @@
  * Should require very few malloc/free calls!
  */
 
-struct octo_buffer_item
+typedef struct octo_buffer_item
 {
     octo_list list;
     size_t start;
-    size_t end;
     size_t size;
+    size_t capacity;
     uint8_t data[];
 } octo_buffer_item;
 

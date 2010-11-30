@@ -23,6 +23,10 @@
 #ifndef OCTO_LIST_H
 #define OCTO_LIST_H
 
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 /**
  * doubly linked intrusive list much like the linux kernel's linked list.
  *
@@ -175,6 +179,19 @@ static inline octo_list * octo_list_head(octo_list *list)
 {
     return list->next;
 }
+
+/**
+ * test if the list is empty 
+ */
+static inline bool octo_list_empty(octo_list *list)
+{
+    if(list->next == list && list->prev == list)
+    {
+        return true;
+    }
+    return false;
+}
+
 
 /**
  * The clever little macro that could. Obtains a pointer to the struct
