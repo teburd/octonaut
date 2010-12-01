@@ -112,6 +112,41 @@ START_TEST (test_octo_buffer_read)
             "buffer read does not match expected string");
     }
 
+    len = octo_buffer_write(&buf, (uint8_t*)mystr, sizeof(mystr));
+
+    fail_unless(len == sizeof(mystr),
+        "buffer write did not return correct length");
+
+    fail_unless(octo_buffer_size(&buf) == sizeof(mystr),
+        "buffer size is not correct");
+
+    len = octo_buffer_read(&buf, (uint8_t*)cmpstr, 4);
+
+    fail_unless(octo_buffer_size(&buf) == sizeof(mystr) - 4,
+        "buffer size is not correct");
+
+    cmpstr[4] = '\0';
+
+    fail_unless(strncmp(cmpstr, "the ", sizeof(mystr)) == 0,
+        "buffer read does not match expected string");
+
+    len = octo_buffer_read(&buf, (uint8_t*)cmpstr, 6);
+
+    fail_unless(octo_buffer_size(&buf) == sizeof(mystr) - 10,
+        "buffer size is not correct");
+
+    cmpstr[6] = '\0';
+
+    fail_unless(strncmp(cmpstr, "world ", sizeof(mystr)) == 0,
+        "buffer read does not match expected string");
+
+    len = octo_buffer_read(&buf, (uint8_t*)cmpstr, sizeof(mystr));
+
+    fail_unless(octo_buffer_size(&buf) == 0,
+        "buffer size is not correct");
+
+    fail_unless(len == sizeof(mystr) - 10,
+        "buffer read did not return correct length");
 
     octo_buffer_destroy(&buf);
 }
