@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CHUNK_SIZE 4096 
+
 #define min(x, y) ((x)<(y)?(x):(y))
 #define max(x, y) ((x)<(y)?(x):(y))
 
@@ -132,13 +134,13 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
     }
     else
     {
-        item = octo_buffer_item_alloc(4096);
+        item = octo_buffer_item_alloc(CHUNK_SIZE);
         octo_list_push(&b->buffer_list, &item->list);
     }
 
     while(copied < len)
     {
-        copylen = min(len, octo_buffer_item_remaining(item));
+        copylen = min(len-copied, octo_buffer_item_remaining(item));
 
         if(copylen > 0)
         {
@@ -149,7 +151,7 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
 
         if(copied < len)
         {
-            item = octo_buffer_item_alloc(len);
+            item = octo_buffer_item_alloc(CHUNK_SIZE);
             octo_list_push(&b->buffer_list, &item->list);
         }
     }
@@ -178,7 +180,7 @@ size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
         }
 
         octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
-        copylen = min(len, octo_buffer_item_size(item));
+        copylen = min(len-copied, octo_buffer_item_size(item));
         memcpy(&data[copied], &item->data[item->start], copylen);
         copied += copylen;
 
