@@ -111,7 +111,7 @@ size_t octo_buffer_fread(octo_buffer *b, int fd, size_t len);
  *
  * return the actual number of bytes read.
  */
-size_t octo_buffer_peek(const octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_peek(octo_buffer *b, uint8_t *data, size_t len);
 
 /**
  * remove from the buffer at most len bytes.

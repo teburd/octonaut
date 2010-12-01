@@ -116,11 +116,6 @@ size_t octo_buffer_size(const octo_buffer *b)
     return b->size;
 }
 
-/**
- * copy the given data in to the buffer
- *
- * return the number of bytes actually written
- */
 size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
 {
     size_t copylen = 0;
@@ -160,11 +155,6 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
     return copied;
 }
 
-/**
- * copy data from the buffer to the pointer given
- *
- * return the number of bytes actually copied
- */
 size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
 {
     size_t copied = 0;
@@ -195,4 +185,35 @@ size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
 
     b->size -= copied;
     return copied;
+}
+
+size_t octo_buffer_peek(octo_buffer *b, uint8_t *data, size_t len)
+{
+    size_t copied = 0;
+    size_t copylen = 0;
+
+    octo_list *tail = octo_list_tail(&b->buffer_list);
+    octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
+
+    if(tail == &b->buffer_list)
+    {
+        return 0;
+    }
+
+    while(copied < len)
+    {
+        copylen = min(len-copied, octo_buffer_item_size(item));
+        memcpy(&data[copied], &item->data[item->start], copylen);
+        copied += copylen;
+
+        if(copied >= octo_buffer_item_size(item))
+        {
+            tail = tail->prev;
+            item = octo_list_entry(tail, octo_buffer_item, list);
+        }
+    }
+
+    b->size -= copied;
+    return copied;
+
 }
