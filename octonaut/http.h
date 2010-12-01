@@ -22,12 +22,9 @@
 
 #include "protocol.h"
 
-/**
- * HTTP Protocol
- */
-typedef struct
+typedef struct http_protocol
 {
-    Protocol protocol
-} HTTPProtocol;
+    protocol http;
+} http_protocol;
 
 
