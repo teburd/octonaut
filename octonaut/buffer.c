@@ -132,7 +132,7 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
     }
     else
     {
-        item = octo_buffer_item_alloc(len);
+        item = octo_buffer_item_alloc(4096);
         octo_list_push(&b->buffer_list, &item->list);
     }
 
