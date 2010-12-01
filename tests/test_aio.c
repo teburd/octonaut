@@ -87,6 +87,8 @@ START_TEST (test_octo_aio_pipe)
     fail_unless(ctx.byte_count == msg_len,
         "message read from pipe using aio not hte length of the message.");
 
+    octo_aio_destroy(&aios[0]);
+    octo_aio_destroy(&aios[1]);
 }
 END_TEST
 
