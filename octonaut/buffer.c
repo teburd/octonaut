@@ -50,6 +50,7 @@ static inline octo_buffer_item * octo_buffer_item_alloc(size_t len)
     item->start = 0;
     item->size = 0;
     item->capacity = len;
+
     return item;
 }
 
@@ -58,18 +59,10 @@ static inline octo_buffer_item * octo_buffer_item_alloc(size_t len)
  * to a list containing a free buffer pool (stack buffer pool)
  * or actually calling free()
  */
-static inline void octo_buffer_item_free(size_t len)
+static inline void octo_buffer_item_free(octo_buffer_item *item)
 {
-    octo_buffer_item *item;
-
-    item = malloc(sizeof(octo_buffer_item) + len);
-    item->start = 0;
-    item->size = 0;
-    item->capacity = len;
-    return item;
+    free(item);
 }
-
-
 
 /**
  * item bytes used
@@ -111,17 +104,55 @@ size_t octo_buffer_size(const octo_buffer *b)
 {
     return b->size;
 }
+
+/**
+ * copy the given data in to the buffer
+ *
+ * return the number of bytes actually written
+ */
 size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
 {
-    octo_buffer_item *item = octo_buffer_item_alloc(len);
-    memcpy(item->data, data, min(len, octo_buffer_item_remaining(item)));
-    octo_list_push(&b->buffer_list, &item->list);
-    return len;
+    size_t copylen = 0;
+    size_t copied = 0;
+
+    while(copied < len)
+    {
+        octo_buffer_item *item = octo_buffer_item_alloc(len);
+        copylen = min(len, octo_buffer_item_remaining(item));
+        memcpy(item->data, &data[copied], copylen);
+        octo_list_push(&b->buffer_list, &item->list);
+        copied += copylen;
+    }
+
+    b->size += copied;
+    return copied;
 }
 
+/**
+ * copy data from the buffer to the pointer given
+ *
+ * return the number of bytes actually copied
+ */
 size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
 {
-    octo_buffer_item *item = octo_list_entry(octo_list_tail(&b->buffer_list), octo_buffer_item, list);
-    size_t cpylen = min(len, octo_buffer_item_remaining(item));
-    memcpy(data, item->data, cpylen);
+    size_t copied = 0;
+    size_t copylen = 0;
+
+    while(copied < len)
+    {
+        octo_list *tail = octo_list_tail(&b->buffer_list);
+
+        if(tail == &b->buffer_list)
+        {
+            break;
+        }
+
+        octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
+        copylen = min(len, octo_buffer_item_remaining(item));
+        memcpy(&data[copied], item->data, copylen);
+        copied += copylen;
+    }
+    
+    b->size -= copied;
+    return copied;
 }

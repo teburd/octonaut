@@ -16,8 +16,23 @@ END_TEST
 START_TEST (test_octo_buffer_size)
 {
     octo_buffer buf;
+    const char mystr[] = "the world is not enough";
+    char cmpstr[sizeof(mystr)];
 
     octo_buffer_init(&buf); 
+
+    fail_unless(octo_buffer_size(&buf) == 0,
+        "buffer size is not correct");
+
+    octo_buffer_write(&buf, (uint8_t*)mystr, sizeof(mystr));
+
+    fail_unless(octo_buffer_size(&buf) == sizeof(mystr),
+        "buffer size is not correct");
+
+    octo_buffer_read(&buf, (uint8_t*)cmpstr, sizeof(mystr));
+
+    fail_unless(octo_buffer_size(&buf) == 0,
+        "buffer size is not correct");
 
     octo_buffer_destroy(&buf);
 }
@@ -25,10 +40,26 @@ END_TEST
 
 START_TEST (test_octo_buffer_write)
 {
+    size_t len = 0;
     octo_buffer buf;
+    const char mystr[] = "the world is not enough";
 
     octo_buffer_init(&buf); 
 
+    fail_unless(octo_buffer_size(&buf) == 0,
+        "buffer size is not correct");
+
+    for(int i = 0; i < 10; ++i)
+    {
+        len = octo_buffer_write(&buf, (uint8_t*)mystr, sizeof(mystr));
+
+        fail_unless(len == sizeof(mystr),
+            "buffer write did not return of string");
+        
+        fail_unless(octo_buffer_size(&buf) == (i+1)*sizeof(mystr),
+            "buffer size is not correct");
+    }
+   
     octo_buffer_destroy(&buf);
 }
 END_TEST
@@ -46,9 +77,41 @@ END_TEST
 
 START_TEST (test_octo_buffer_read)
 {
+    size_t len = 0;
     octo_buffer buf;
+    const char mystr[] = "the world is not enough";
+    char cmpstr[sizeof(mystr)];
 
     octo_buffer_init(&buf); 
+
+    fail_unless(octo_buffer_size(&buf) == 0,
+        "buffer size is not correct");
+
+    for(int i = 0; i < 10; ++i)
+    {
+        len = octo_buffer_write(&buf, (uint8_t*)mystr, sizeof(mystr));
+
+        fail_unless(len == sizeof(mystr),
+            "buffer write did not return of string");
+        
+        fail_unless(octo_buffer_size(&buf) == (i+1)*sizeof(mystr),
+            "buffer size is not correct");
+    }
+
+    for(int i = 0; i < 10; ++i)
+    {
+        len = octo_buffer_read(&buf, (uint8_t*)cmpstr, sizeof(mystr));
+
+        fail_unless(len == sizeof(mystr),
+            "buffer read did not return of string");
+        
+        fail_unless(octo_buffer_size(&buf) == (9-i)*sizeof(mystr),
+            "buffer size is not correct");
+       
+        fail_unless(strncmp(cmpstr, mystr, sizeof(mystr)) == 0,
+            "buffer read does not match expected string");
+    }
+
 
     octo_buffer_destroy(&buf);
 }
