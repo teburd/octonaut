@@ -55,7 +55,7 @@ typedef struct octo_logger
 void octo_logger_init(octo_logger *lgr, const char *name);
 void octo_logger_destroy(octo_logger *lgr);
 
-void octo_logger_add_output(octo_logger *lgr, octo_log_level level, int fd, bool colorize);
+void octo_logger_add_output(octo_logger *lgr, octo_log_level level, FILE* stream, bool colorize);
 
 octo_log_level octo_logger_level(octo_logger *lgr);
 void octo_logger_set_level(octo_logger *lgr, octo_log_level level);

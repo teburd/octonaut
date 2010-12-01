@@ -82,12 +82,12 @@ octo_logger* octo_logger_static()
  * add a octo_logger output
  * @lgr: octo_logger to append an output to
  * @lvl: level the output should be used for
- * @fd: file descriptor to write to
+ * @stream: FILE* stream to write to
  */
-void octo_logger_add_output(octo_logger *lgr, octo_log_level level, int fd, bool colorize)
+void octo_logger_add_output(octo_logger *lgr, octo_log_level level, FILE* stream, bool colorize)
 {
     octo_log_output *out = malloc(sizeof(octo_log_output));
-    out->stream = fdopen(dup(fd), "a+");
+    out->stream = stream;
     out->colorize = colorize;
     octo_list_init(&out->list);
     octo_list_add(&lgr->outs[level], &out->list);
