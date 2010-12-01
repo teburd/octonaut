@@ -34,7 +34,8 @@ def configure(conf):
     conf.env.append_value('CFLAGS', '-Wall -pedantic -std=gnu99 -fprofile-arcs -ftest-coverage'.split())
 
 def test(ctx):
-    ctx.exec_command('./build/tests/octonaut_tests') 
+    print(ctx.variant_dir)
+    ctx.exec_command(ctx.variant_dir + '/tests/octonaut_tests') 
 
 def valgrindtest(ctx):
     ctx.exec_command('CK_FORK=no valgrind --leak-check=full -v ./build/tests/octonaut_tests') 
@@ -44,7 +45,7 @@ def gdbtest(ctx):
 
 def build(bld):
     if not bld.variant: 
-        bld.fatal('call "waf debug" or "waf release", and try "waf --help"')
+        bld.fatal('call "waf build_debug" or "waf build_release", and try "waf --help"')
     bld.recurse('octonaut')
     bld.recurse('tests')
     bld.options.all_tests = True

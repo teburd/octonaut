@@ -45,7 +45,14 @@ void octo_hash_init(octo_hash *hash);
 
 void octo_hash_add(octo_hash *hash, octo_hash_item *item);
 
-void octo_hash_remove(octo_hash_item *item);
+void octo_hash_remove(octo_hash *hash, uint32_t hash);
+
+octo_hash * octo_hash_get(octo_hash *hash, uint32_t hash);
+
+octo_hash * octo_hash_pop(octo_hash *hash, uint32_t hash);
+
+size_t octo_hash_size(const octo_hash *hash);
+
 
 /**
  * The clever little macro that could. Obtains a pointer to the struct
@@ -55,3 +62,5 @@ void octo_hash_remove(octo_hash_item *item);
  */
 #define octo_hash_entry(ptr, type, member) \
     ((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
+
+#endif
