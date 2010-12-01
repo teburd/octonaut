@@ -27,10 +27,6 @@ def configure(conf):
     conf.setenv('release', base_env)
     conf.env.append_value('CFLAGS', '-ffast-math -O3'.split())
 
-    conf.setenv('coverage', base_env)
-    conf.check_cc(lib='gcov', uselib_store='gcov', mandatory=True)
-    conf.env.append_value('CFLAGS', '-fprofile-arcs -ftest-coverage'.split())
-
 def test(ctx):
     if not ctx.variant_dir:
         ctx.exec_command('./build/tests/octonaut_tests')
@@ -51,7 +47,7 @@ def build(bld):
 
 from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext
 
-for x in 'debug release coverage'.split():
+for x in 'debug release'.split():
     for y in (BuildContext, CleanContext, InstallContext, UninstallContext):
         name = y.__name__.replace('Context','').lower()
         class tmp(y): 
