@@ -14,28 +14,28 @@ def options(opt):
     opt.load('gnu_dirs')
 
 def configure(conf):
-    conf.setenv('debug')
     conf.load('compiler_c')
     conf.check_cc(lib='ev', uselib_store='ev', mandatory=True)
     conf.check_cc(lib='check', uselib_store='check', mandatory=False)
-    conf.env.append_value('CFLAGS', '-Wall -pedantic -std=gnu99 -g'.split())
+    conf.env.append_value('CFLAGS', '-Wall -pedantic -std=gnu99'.split())
+    
+    base_env = conf.env.derive()
 
-    conf.setenv('release')
-    conf.load('compiler_c')
-    conf.check_cc(lib='ev', uselib_store='ev', mandatory=True)
-    conf.check_cc(lib='check', uselib_store='check', mandatory=False)
-    conf.env.append_value('CFLAGS', '-Wall -pedantic -std=gnu99 -ffast-math -O3'.split())
+    conf.setenv('debug', base_env)
+    conf.env.append_value('CFLAGS', '-g'.split())
 
-    conf.setenv('coverage')
-    conf.load('compiler_c')
-    conf.check_cc(lib='ev', uselib_store='ev', mandatory=True)
-    conf.check_cc(lib='check', uselib_store='check', mandatory=False)
+    conf.setenv('release', base_env)
+    conf.env.append_value('CFLAGS', '-ffast-math -O3'.split())
+
+    conf.setenv('coverage', base_env)
     conf.check_cc(lib='gcov', uselib_store='gcov', mandatory=True)
-    conf.env.append_value('CFLAGS', '-Wall -pedantic -std=gnu99 -fprofile-arcs -ftest-coverage'.split())
+    conf.env.append_value('CFLAGS', '-fprofile-arcs -ftest-coverage'.split())
 
 def test(ctx):
-    print(ctx.variant_dir)
-    ctx.exec_command(ctx.variant_dir + '/tests/octonaut_tests') 
+    if not ctx.variant_dir:
+        ctx.exec_command('./build/tests/octonaut_tests')
+    else:
+        ctx.exec_command(ctx.variant_dir + '/tests/octonaut_tests') 
 
 def valgrindtest(ctx):
     ctx.exec_command('CK_FORK=no valgrind --leak-check=full -v ./build/tests/octonaut_tests') 
@@ -44,8 +44,6 @@ def gdbtest(ctx):
     ctx.exec_command('CK_FORK=no gdb ./build/tests/octonaut_tests') 
 
 def build(bld):
-    if not bld.variant: 
-        bld.fatal('call "waf build_debug" or "waf build_release", and try "waf --help"')
     bld.recurse('octonaut')
     bld.recurse('tests')
     bld.options.all_tests = True
