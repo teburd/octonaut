@@ -31,7 +31,6 @@ START_TEST (test_octo_buffer_size)
 
     octo_buffer_read(&buf, (uint8_t*)cmpstr, sizeof(mystr));
 
-    printf("buffer size is %zu\n", octo_buffer_size(&buf));
     fail_unless(octo_buffer_size(&buf) == 0,
         "buffer size is not correct");
 
