@@ -61,6 +61,7 @@ static inline octo_buffer_item * octo_buffer_item_alloc(size_t len)
  */
 static inline void octo_buffer_item_free(octo_buffer_item *item)
 {
+    octo_list_remove(&item->list);
     free(item);
 }
 
@@ -96,6 +97,14 @@ void octo_buffer_init(octo_buffer *b)
 
 void octo_buffer_destroy(octo_buffer *b)
 {
+    octo_buffer_item *pos;
+    octo_buffer_item *next;
+
+    octo_list_foreach(pos, next, &b->buffer_list, list)
+    {
+        octo_buffer_item_free(pos);
+    }
+
     octo_list_destroy(&b->buffer_list);
     b->size = 0;
 }
@@ -149,10 +158,16 @@ size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
 
         octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
         copylen = min(len, octo_buffer_item_remaining(item));
-        memcpy(&data[copied], item->data, copylen);
+        memcpy(&data[copied], &item->data[item->start], copylen);
         copied += copylen;
+
+        item->start += copylen;
+        if(octo_buffer_item_remaining(item) == 0)
+        {
+            octo_buffer_item_free(item);
+        }
     }
-    
+
     b->size -= copied;
     return copied;
 }
