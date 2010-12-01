@@ -192,6 +192,25 @@ static inline bool octo_list_empty(octo_list *list)
     return false;
 }
 
+/**
+ * obtain the size of the list, this is slow!
+ */
+static inline size_t octo_list_size(octo_list *list)
+{
+    size_t count = 0;
+    octo_list *pos = list->next;
+    octo_list *cur = list->next;
+
+    while(pos != list)
+    {
+        cur = pos;
+        pos = cur->next;
+        count += 1;
+    }
+
+    return count;
+}
+
 
 /**
  * The clever little macro that could. Obtains a pointer to the struct

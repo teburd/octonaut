@@ -86,7 +86,7 @@ static inline size_t octo_buffer_item_capacity(octo_buffer_item *item)
  */
 static inline size_t octo_buffer_item_remaining(octo_buffer_item *item)
 {
-    return item->capacity - item->start;
+    return item->capacity - (item->size + item->start);
 }
 
 void octo_buffer_init(octo_buffer *b)
@@ -123,14 +123,35 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
 {
     size_t copylen = 0;
     size_t copied = 0;
+    octo_buffer_item *item = NULL;
+    octo_list *head = octo_list_head(&b->buffer_list);
+
+    if(head != &b->buffer_list)
+    {
+        item = octo_list_entry(head, octo_buffer_item, list);
+    }
+    else
+    {
+        item = octo_buffer_item_alloc(len);
+        octo_list_push(&b->buffer_list, &item->list);
+    }
 
     while(copied < len)
     {
-        octo_buffer_item *item = octo_buffer_item_alloc(len);
         copylen = min(len, octo_buffer_item_remaining(item));
-        memcpy(item->data, &data[copied], copylen);
-        octo_list_push(&b->buffer_list, &item->list);
-        copied += copylen;
+
+        if(copylen > 0)
+        {
+            memcpy(&item->data[item->start+item->size], &data[copied], copylen);
+            item->size += copylen;
+            copied += copylen;
+        }
+
+        if(copied < len)
+        {
+            item = octo_buffer_item_alloc(len);
+            octo_list_push(&b->buffer_list, &item->list);
+        }
     }
 
     b->size += copied;
@@ -157,12 +178,14 @@ size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
         }
 
         octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
-        copylen = min(len, octo_buffer_item_remaining(item));
+        copylen = min(len, octo_buffer_item_size(item));
         memcpy(&data[copied], &item->data[item->start], copylen);
         copied += copylen;
 
         item->start += copylen;
-        if(octo_buffer_item_remaining(item) == 0)
+        item->size -= copylen;
+
+        if(octo_buffer_item_size(item) == 0)
         {
             octo_buffer_item_free(item);
         }
