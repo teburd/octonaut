@@ -19,7 +19,7 @@ void octo_protocol_destroy(octo_protocol *p)
 /**
  * callback to a Protocol that it has been connected
  */
-void octo_protocol_connected(octo_protocol *p, octo_aio_address *a)
+void octo_protocol_connected(octo_protocol *p, char *address)
 {
     p->connected(p, a);
 }

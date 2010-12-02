@@ -36,23 +36,12 @@ typedef struct octo_aio_error
 } octo_aio_error;
 
 /**
- * octo_aio address
- *
- * Address information. Typically aio is done with some form of file
- * descriptor with an addressing concept. The address should always
- * be encoded as a string.
- */
-typedef struct octo_aio_address
-{
-    char *address;
-} octo_aio_address;
-
-/**
  * octo_aio 
  *
  * Provides intelligently buffered asynchronous non-blocking IO on a file
  * descriptor. Buffers on write only when needed otherwise simply writes
- * directly to the socket.
+ * directly to the socket. The write buffer is limited in size and a write
+ * call may fail under such circumstances.
  */
 typedef struct octo_aio octo_aio;
 typedef void (*octo_aio_write_cb) (void *ctx, uint8_t *data, size_t len);

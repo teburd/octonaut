@@ -22,6 +22,5 @@
 
 #include "protocol.h"
 
-
 void octo_server_init(octo_server *s);
 void octo_server_destroy(octo_server *s);

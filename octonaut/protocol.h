@@ -25,7 +25,6 @@
 
 #include "aio.h"
 
-
 /**
  * Protocol handler
  *
@@ -33,7 +32,7 @@
  * May send things back on the octo_aio.
  */
 typedef struct octo_protocol octo_protocol;
-typedef void (*octo_protocol_connected_cb) (octo_protocol *p, octo_aio_address *a);
+typedef void (*octo_protocol_connected_cb) (octo_protocol *p, char *address);
 typedef void (*octo_protocol_data_cb) (octo_protocol *p, uint8_t *data, size_t len);
 typedef void (*octo_protocol_disconnected_cb)(octo_protocol* p, octo_aio_error *e);
 
@@ -59,7 +58,7 @@ typedef struct octo_protocol_factory {
 void octo_protocol_init(octo_protocol *p);
 void octo_protocol_destroy(octo_protocol *p);
 
-void octo_protocol_connected(octo_protocol *p, octo_aio_address *a);
+void octo_protocol_connected(octo_protocol *p, char *address);
 void octo_protocol_data(octo_protocol *p, uint8_t *data, size_t len);
 void octo_protocol_disconnected(octo_protocol *p, octo_aio_error *e);
 
