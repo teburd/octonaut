@@ -23,57 +23,107 @@
 #ifndef OCTO_HASH_H
 #define OCTO_HASH_H
 
+#include <assert.h>
+
 #include "list.h"
 
+
 /**
- * fast, simple, intrusive hash map store.
+ * intrusive hash table store.
+ *
+ * choice of hash function is up to the creator of the store
+ * otherwise takes care of finding, storing, removing, and
+ * to some degree iterating over the hash map.
+ *
+ * it uses power of 2 sizes only to avoid using a true modulus.
+ * modulus operations are very very slow, making hash bin lookups
+ * slow.
+ *
  */
+
+typedef uint64_t (*octo_hash_function)(uint8_t *key, size_t keylen);
+
 typedef struct octo_hash
 {
-    size_t n_hash_bins;
+    uint64_t n_hash_bins;
     octo_list hash_bins[];
 } octo_hash;
 
-typedef struct octo_hash_item
+typedef struct octo_hash_entry
 {
-    uint32_t hash;
-    octo_list *hash_list;
-    octo_hash *hash_table;
-} octo_hash_item;
+    octo_list hash_list;
+    size_t keylen;
+    uint8_t *key;
+} octo_hash_entry;
 
-static inline void octo_hash_init(octo_hash *hash)
+static bool power_of_two(uint64_t x)
 {
+    return (x!=0) && ((x&(x-1)) == 0);
+}
+
+static inline void octo_hash_init(octo_hash *hash, octo_hash_function hash_function)
+{
+    assert(hash->n_hash_bins != 0);
+    assert(power_of_two(hash->n_hash_bins));
 }
 
 static inline void octo_hash_destroy(octo_hash *hash)
 {
 }
 
-static inline void octo_hash_add(octo_hash *hash, octo_hash_item *item)
+/**
+ * obtain the hash bin number given the number of bins and a hash
+ */
+static inline uint64_t octo_hash_nbin(uint64_t bins, uint64_t hash)
 {
+    return (hash & (bins-1));
 }
 
-static inline void octo_hash_remove(octo_hash *hash, uint32_t hash)
+/**
+ * obtain the hash bin given the hash and key
+ */
+static inline octo_list * octo_hash_bin(octo_hash *hash, uint64_t hash)
 {
+    uint64_t nbin = octo_hash_nbin(hash->n_hash_bins, hash);
+    return hash->hash_bins[nbin];
 }
 
-static inline octo_hash * octo_hash_get(octo_hash *hash, uint32_t hash)
+static inline uint64_t octo_hash_size(const octo_hash *hash)
 {
-}
-
-static inline octo_hash * octo_hash_pop(octo_hash *hash, uint32_t hash)
-{
-}
-
-static inline size_t octo_hash_size(const octo_hash *hash)
-{
+    uint64_t size = 0;
+    for(uint64_t i = 0; i < hash->n_hash_bins; ++i)
+    {
+        size += octo_list_size(hash->hash_bins[i]);
+    }
+    return size;
 }
 
 
 /**
+ * put an entry in to the hash table
+ */
+void octo_hash_put(octo_hash *hash, octo_hash_entry *entry)
+{
+}
+
+/**
+ * get an entry from the hash table
+ */
+octo_hash_entry * octo_hash_get(octo_hash *hash, uint8_t *key, size_t keylen)
+{
+}
+
+/**
+ * get and remove an entry from the hash table
+ */
+octo_hash_entry * octo_hash_pop(octo_hash *hash, uint8_t *key, size_t keylen)
+{
+}
+
+/**
  * The clever little macro that could. Obtains a pointer to the struct
- * that the octo_list is contained in. This is done by subtracting the offset
- * of the octo_list member from the address of the address of the octo_list 
+ * that the octo_hash_entry is contained in. This is done by subtracting the offset
+ * of the octo_hash_entry member from the address of the address of the octo_hash_entry
  * member.
  */
 #define octo_hash_entry(ptr, type, member) \
