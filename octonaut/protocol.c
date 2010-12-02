@@ -21,7 +21,7 @@ void octo_protocol_destroy(octo_protocol *p)
  */
 void octo_protocol_connected(octo_protocol *p, char *address)
 {
-    p->connected(p, a);
+    p->connected(p, address);
 }
 
 /**
