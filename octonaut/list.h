@@ -193,7 +193,7 @@ static inline bool octo_list_empty(octo_list *list)
 }
 
 /**
- * obtain the size of the list, this is slow!
+ * obtain the size of the list
  */
 static inline size_t octo_list_size(octo_list *list)
 {

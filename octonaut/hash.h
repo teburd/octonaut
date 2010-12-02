@@ -41,17 +41,33 @@ typedef struct octo_hash_item
     octo_hash *hash_table;
 } octo_hash_item;
 
-void octo_hash_init(octo_hash *hash);
+static inline void octo_hash_init(octo_hash *hash)
+{
+}
 
-void octo_hash_add(octo_hash *hash, octo_hash_item *item);
+static inline void octo_hash_destroy(octo_hash *hash)
+{
+}
 
-void octo_hash_remove(octo_hash *hash, uint32_t hash);
+static inline void octo_hash_add(octo_hash *hash, octo_hash_item *item)
+{
+}
 
-octo_hash * octo_hash_get(octo_hash *hash, uint32_t hash);
+static inline void octo_hash_remove(octo_hash *hash, uint32_t hash)
+{
+}
 
-octo_hash * octo_hash_pop(octo_hash *hash, uint32_t hash);
+static inline octo_hash * octo_hash_get(octo_hash *hash, uint32_t hash)
+{
+}
 
-size_t octo_hash_size(const octo_hash *hash);
+static inline octo_hash * octo_hash_pop(octo_hash *hash, uint32_t hash)
+{
+}
+
+static inline size_t octo_hash_size(const octo_hash *hash)
+{
+}
 
 
 /**
