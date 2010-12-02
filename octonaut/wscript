@@ -2,6 +2,6 @@
 
 def build(bld):
     bld.stlib(
-        source = ['buffer.c', 'logger.c', 'aio.c', 'protocol.c'],
+        source = ['buffer.c', 'logger.c', 'aio.c', 'protocol.c', 'hash_function.c'],
         target = 'octonaut',
         export_includes = ".")

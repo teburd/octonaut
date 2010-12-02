@@ -7,6 +7,7 @@
 
 #include "test_list.c"
 #include "test_buffer.c"
+#include "test_hash_function.c"
 #include "test_logger.c"
 #include "test_aio.c"
 
@@ -16,6 +17,7 @@ Suite* octonaut_suite(void)
     Suite *s = suite_create("octonaut");
     suite_add_tcase(s, octo_list_tcase());
     suite_add_tcase(s, octo_buffer_tcase()); 
+    suite_add_tcase(s, octo_hash_function_tcase()); 
     suite_add_tcase(s, octo_logger_tcase()); 
     suite_add_tcase(s, octo_aio_tcase()); 
     return s;

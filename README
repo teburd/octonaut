@@ -15,6 +15,9 @@ The goals of octonaut include.
 * Completely tested with unit, functional, and benchmark tests.
 * Completely documented with something thats *NOT DOXYGEN*. Possibly
   sphinx as I really like the results.
+* Avoid malloc/free, application data and the stack our the best friends of
+  long lived processes. Heap allocations without a moving garbage collector
+  for a long lived process is the stuff nightmares are made of.
 
 In regards to python bindings, octonaut should include
 * A thread safe asynchronous WSGI server. You can do something like threading.spawn(octowsgi.serve(wsgi_app))

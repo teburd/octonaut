@@ -41,11 +41,11 @@
  *
  */
 
-typedef uint64_t (*octo_hash_function)(uint8_t *key, size_t keylen);
+typedef uint32_t (*octo_hash_function)(uint8_t *key, size_t keylen);
 
 typedef struct octo_hash
 {
-    uint64_t n_hash_bins;
+    uint32_t n_hash_bins;
     octo_list hash_bins[];
 } octo_hash;
 
@@ -56,7 +56,7 @@ typedef struct octo_hash_entry
     uint8_t *key;
 } octo_hash_entry;
 
-static bool power_of_two(uint64_t x)
+static bool power_of_two(uint32_t x)
 {
     return (x!=0) && ((x&(x-1)) == 0);
 }
@@ -74,7 +74,7 @@ static inline void octo_hash_destroy(octo_hash *hashtable)
 /**
  * obtain the hash bin number given the number of bins and a hash
  */
-static inline uint64_t octo_hash_nbin(uint64_t bins, uint64_t keyhash)
+static inline uint32_t octo_hash_nbin(uint32_t bins, uint32_t keyhash)
 {
     return (keyhash & (bins-1));
 }
@@ -82,16 +82,16 @@ static inline uint64_t octo_hash_nbin(uint64_t bins, uint64_t keyhash)
 /**
  * obtain the hash bin given the hash and key
  */
-static inline octo_list * octo_hash_bin(octo_hash *hashtable, uint64_t keyhash)
+static inline octo_list * octo_hash_bin(octo_hash *hashtable, uint32_t keyhash)
 {
-    uint64_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
+    uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
     return hashtable->hash_bins[nbin];
 }
 
-static inline uint64_t octo_hash_size(const octo_hash *hashtable)
+static inline uint32_t octo_hash_size(const octo_hash *hashtable)
 {
-    uint64_t size = 0;
-    for(uint64_t i = 0; i < hashtable->n_hash_bins; ++i)
+    uint32_t size = 0;
+    for(uint32_t i = 0; i < hashtable->n_hash_bins; ++i)
     {
         size += octo_list_size(hashtable->hash_bins[i]);
     }
@@ -103,7 +103,7 @@ static inline uint64_t octo_hash_size(const octo_hash *hashtable)
  */
 bool octo_hash_has(octo_hash *hashtable, uint8_t *key, size_t keylen)
 {
-    uint64_t keyhash = hashtable->hash_function(key, keylen);
+    uint32_t keyhash = hashtable->hash_function(key, keylen);
     octo_list *list = octo_hash_bin(hashtable->n_hash_bins, keyhash);
     octo_list_foreach(pos, next, octo_hash_item, list)
     {
@@ -116,7 +116,7 @@ bool octo_hash_has(octo_hash *hashtable, uint8_t *key, size_t keylen)
  */
 void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
-    uint64_t keyhash = hashtable->hash_function(entry->key, entry->keylen);
+    uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen);
 }
 
 /**
@@ -124,7 +124,7 @@ void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
  */
 octo_hash_entry * octo_hash_get(octo_hash *hashtable, uint8_t *key, size_t keylen)
 {
-    uint64_t hash = hash->hash_function(key, keylen);
+    uint32_t hash = hash->hash_function(key, keylen);
 }
 
 /**
@@ -132,7 +132,7 @@ octo_hash_entry * octo_hash_get(octo_hash *hashtable, uint8_t *key, size_t keyle
  */
 octo_hash_entry * octo_hash_pop(octo_hash *hashtable, uint8_t *key, size_t keylen)
 {
-    uint64_t hash = hash->hash_function(key, keylen);
+    uint32_t hash = hash->hash_function(key, keylen);
 }
 
 /**
