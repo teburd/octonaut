@@ -1,4 +1,5 @@
-Octonaut is a fast socket server library to use with libev.
+Octonaut is a fast socket server library to use with libev with some
+submodules and utilities often needed with socket server libraries.
 
 The goals of octonaut include.
 * Asynchronous DNS lookups.
@@ -8,16 +9,22 @@ The goals of octonaut include.
 * Asynchronous HTTP/1.1 Server.
 * Asynchronous HTTP/1.1 Client.
 * Asynchronous Basis for RPC Servers and Clients, perhaps
-  with JSON-RPC and MSGPACK-RPC implementations?
-* Bindings for several languages, primarily Python though duh!
+  with JSON-RPC and MSGPACK-RPC implementations.
+* Bindings for several languages and in particular
+  their native gateway interfaces! Primarily Python and wsgi though!
 * Completely tested with unit, functional, and benchmark tests.
-* Completely documented with Sphinx (Sphinx Rocks!) *NOT DOXYGEN*
+* Completely documented with something thats *NOT DOXYGEN*. Possibly
+  sphinx as I really like the results.
 
 In regards to python bindings, octonaut should include
-* An Asynchronous WSGI Container
+* A thread safe asynchronous WSGI server. You can do something like threading.spawn(octowsgi.serve(wsgi_app))
+  and it will work. No more greenlet/gevent bugs and slowness. Threads really are fine for IO
+  bound tasks in python, especially since the parsing work is all done in C in the background
+  thread then.
+* The ability to create a websocket handler through a wsgi application though
+  the *gasp* magic of an object that handles callbacks *gasp*.
 * Simple way to make psycopg2 "not block", perhaps using its waiting function
   to simply run the ev_loop like a coroutine framework would.
-
 
 The general reasoning behind Octonaut is simply most frameworks like this are
 written in the language they are directed at (python, ruby, etc) instead of
