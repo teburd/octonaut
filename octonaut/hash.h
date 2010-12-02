@@ -31,13 +31,12 @@
 /**
  * intrusive hash table store.
  *
- * choice of hash function is up to the creator of the store
- * otherwise takes care of finding, storing, removing, and
- * to some degree iterating over the hash map.
+ * choice of hash function is up to the creator of the store.
+ * this takes care of retrieving, storing, and removing entries.
  *
- * it uses power of 2 sizes only to avoid using a true modulus.
- * modulus operations are very very slow, making hash bin lookups
- * slow.
+ * it uses power of 2 sizes only to avoid using a true modulus
+ * and asserts that the hash table really is power of 2.
+ * modulus operations are very very slow, making hash bin lookups slow!
  *
  */
 
