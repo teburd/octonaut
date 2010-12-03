@@ -158,17 +158,17 @@ START_TEST (test_octo_list_remove)
 END_TEST
 
 
-typedef struct test_struct
+typedef struct test_list_struct
 {
     int value;
     octo_list list;
-} test_struct;
+} test_list_struct;
 
 START_TEST (test_octo_list_foreach)
 {
     octo_list list;
-    test_struct item1;
-    test_struct item2;
+    test_list_struct item1;
+    test_list_struct item2;
 
     item1.value = 1;
     item2.value = 2;
@@ -179,8 +179,8 @@ START_TEST (test_octo_list_foreach)
     octo_list_append(&list, &item1.list);
     octo_list_append(&list, &item2.list);
 
-    test_struct *pos;
-    test_struct *next;
+    test_list_struct *pos;
+    test_list_struct *next;
     int i = 1;
     octo_list_foreach(pos, next, &list, list)
     {

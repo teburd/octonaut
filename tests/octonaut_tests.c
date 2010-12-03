@@ -19,6 +19,7 @@ Suite* octonaut_suite(void)
     suite_add_tcase(s, octo_list_tcase());
     suite_add_tcase(s, octo_buffer_tcase()); 
     suite_add_tcase(s, octo_hash_function_tcase()); 
+    suite_add_tcase(s, octo_hash_tcase()); 
     suite_add_tcase(s, octo_logger_tcase()); 
     suite_add_tcase(s, octo_aio_tcase()); 
     return s;

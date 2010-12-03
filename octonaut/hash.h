@@ -48,7 +48,7 @@ typedef struct octo_hash
     octo_hash_function hash_function;
     uint32_t hash_seed;
     uint32_t n_hash_bins;
-    octo_list hash_bins[];
+    octo_list *hash_bins;
 } octo_hash;
 
 typedef struct octo_hash_entry
