@@ -24,7 +24,7 @@
 
 #define rotl64(num,amount) (((num) << (amount)) | ((num) >> (64 - (amount))))
 
-#define murmur_bmix64(h1, h2, k1, k2, c1, c2) \
+#define murmur3_bmix64(h1, h2, k1, k2, c1, c2) \
     do {\
         k1 *= c1;\
         k1  = rotl64(k1,23);\
@@ -47,7 +47,7 @@
         c2 = c2*5+0x6bce6396;\
     } while(0)
 
-#define murmur_fmix64(k) \
+#define murmur3_fmix64(k) \
     do {\
         k ^= k >> 33;\
         k *= 0xff51afd7ed558ccd;\
@@ -61,11 +61,11 @@
  * murmurhash3 method of hashing for 64 bit machines
  *
  * taken straight from murmurhash3
+ * probably fewer collisions but slower and more complex than x31
  */
-uint32_t murmurhash3(const uint8_t *key, size_t keylen)
+uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32_t seed)
 {
     const int nblocks = keylen/16;
-    const uint32_t seed = 0; /* fixed seed */
 
     uint64_t h1 = 0x9368e53c2f6af274^seed;
     uint64_t h2 = 0x586dcd208f7cd3fd^seed;
@@ -80,7 +80,7 @@ uint32_t murmurhash3(const uint8_t *key, size_t keylen)
         uint64_t k1 = blocks[i*2+0];
         uint64_t k2 = blocks[i*2+1];
 
-        murmur_bmix64(h1,h2,k1,k2,c1,c2);
+        murmur3_bmix64(h1,h2,k1,k2,c1,c2);
     }
 
     //----------
@@ -109,7 +109,7 @@ uint32_t murmurhash3(const uint8_t *key, size_t keylen)
         case  3: k1 ^= ((uint64_t)tail[ 2]) << 16;
         case  2: k1 ^= ((uint64_t)tail[ 1]) << 8;
         case  1: k1 ^= ((uint64_t)tail[ 0]) << 0;
-                 murmur_bmix64(h1,h2,k1,k2,c1,c2);
+                 murmur3_bmix64(h1,h2,k1,k2,c1,c2);
     };
 
     //----------
@@ -120,12 +120,26 @@ uint32_t murmurhash3(const uint8_t *key, size_t keylen)
     h1 += h2;
     h2 += h1;
 
-    murmur_fmix64(h1);
-    murmur_fmix64(h2);
+    murmur3_fmix64(h1);
+    murmur3_fmix64(h2);
 
     h1 += h2;
     h2 += h1;
 
     uint32_t* hash = (uint32_t*)&h1;
     return hash[0];
+}
+
+/**
+ * x31 hash, very simple and fast, probably lots of collisions
+ */
+uint32_t octo_hash_x31(const uint8_t *key, const size_t keylen, const uint32_t seed)
+{
+    uint32_t mkeylen = keylen;
+    uint32_t hash = seed + keylen;
+    for ( ; mkeylen & ~1; mkeylen -= 2, key += 2 )
+        hash = ( ( ( hash * 31 ) + key[0] ) * 31 ) + key[1];
+    if ( mkeylen & 1 )
+        hash = ( hash * 31 ) + key[0];
+    return hash;
 }

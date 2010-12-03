@@ -25,7 +25,7 @@ def configure(conf):
     conf.env.append_value('CFLAGS', '-g'.split())
 
     conf.setenv('release', base_env)
-    conf.env.append_value('CFLAGS', '-ffast-math -O3 -msse4 -ftree-vectorize'.split())
+    conf.env.append_value('CFLAGS', '-Wall -ffast-math -O3'.split())
 
 def test(ctx):
     if not ctx.variant_dir:

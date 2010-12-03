@@ -26,7 +26,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-uint32_t murmurhash3(const uint8_t *key, size_t keylen);
+uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32_t seed);
+uint32_t octo_hash_x31(const uint8_t *key, const size_t keylen, const uint32_t seed);
 
 #endif
 
