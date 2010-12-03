@@ -126,5 +126,6 @@ uint32_t murmurhash3(const uint8_t *key, size_t keylen)
     h1 += h2;
     h2 += h1;
 
-    return ((uint32_t*)&h1)[0];
+    uint32_t* hash = (uint32_t*)&h1;
+    return hash[0];
 }
