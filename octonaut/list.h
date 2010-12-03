@@ -195,7 +195,7 @@ static inline bool octo_list_empty(octo_list *list)
 /**
  * obtain the size of the list
  */
-static inline size_t octo_list_size(octo_list *list)
+static inline size_t octo_list_size(const octo_list *list)
 {
     size_t count = 0;
     octo_list *pos = list->next;

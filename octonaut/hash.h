@@ -143,7 +143,7 @@ static inline bool octo_hash_has(octo_hash *hashtable, uint8_t *key, size_t keyl
 static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
     uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen, hashtable->hash_seed);
-    octo_list *list = octo_hash_bin(hashtable->n_hash_bins, keyhash);
+    octo_list *list = octo_hash_bin(hashtable, keyhash);
 
     if(octo_list_empty(list))
     {
@@ -161,7 +161,7 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 octo_hash_entry * octo_hash_get(octo_hash *hashtable, uint8_t *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
-    octo_list *list = octo_hash_bin(hashtable->n_hash_bins, keyhash);
+    octo_list *list = octo_hash_bin(hashtable, keyhash);
     octo_hash_entry *pos;
     octo_hash_entry *next;
     octo_list_foreach(pos, next, list, hash_list)
