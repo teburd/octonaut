@@ -8,6 +8,7 @@
 #include "test_list.c"
 #include "test_buffer.c"
 #include "test_hash_function.c"
+#include "test_hash.c"
 #include "test_logger.c"
 #include "test_aio.c"
 

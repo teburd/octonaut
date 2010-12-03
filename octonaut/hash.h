@@ -41,10 +41,12 @@
  *
  */
 
-typedef uint32_t (*octo_hash_function)(uint8_t *key, size_t keylen);
+typedef uint32_t (*octo_hash_function)(const uint8_t *key, const size_t keylen, const uint32_t seed);
 
 typedef struct octo_hash
 {
+    octo_hash_function hash_function;
+    uint32_t hash_seed;
     uint32_t n_hash_bins;
     octo_list hash_bins[];
 } octo_hash;
@@ -64,10 +66,12 @@ static bool power_of_two(uint32_t x)
 /**
  * initialize the hash table, does not allocate any memory
  */
-static inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_function)
+static inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_function, uint32_t seed)
 {
     assert(hashtable->n_hash_bins != 0);
     assert(power_of_two(hashtable->n_hash_bins));
+    hashtable->hash_function = hash_function;
+    hashtable->hash_seed = seed;
 }
 
 /**
@@ -91,15 +95,15 @@ static inline uint32_t octo_hash_nbin(uint32_t bins, uint32_t keyhash)
 static inline octo_list * octo_hash_bin(octo_hash *hashtable, uint32_t keyhash)
 {
     uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
-    return hashtable->hash_bins[nbin];
+    return &hashtable->hash_bins[nbin];
 }
 
-static inline uint32_t octo_hash_size(const octo_hash *hashtable)
+static inline size_t octo_hash_size(const octo_hash *hashtable)
 {
-    uint32_t size = 0;
+    size_t size = 0;
     for(uint32_t i = 0; i < hashtable->n_hash_bins; ++i)
     {
-        size += octo_list_size(hashtable->hash_bins[i]);
+        size += octo_list_size(&hashtable->hash_bins[i]);
     }
     return size;
 }
@@ -109,10 +113,10 @@ static inline uint32_t octo_hash_size(const octo_hash *hashtable)
  */
 static inline bool octo_hash_bin_has(octo_hash *hashtable, uint32_t keyhash, uint8_t *key, size_t keylen)
 {
-    octo_list *list = octo_hash_bin(hashtable->n_hash_bins, keyhash);
-    octo_hash_entry *pos = list;
-    octo_hash_entry *next = list->next;
-    octo_list_foreach(pos, next, octo_hash_item, hash_list)
+    octo_list *list = octo_hash_bin(hashtable, keyhash);
+    octo_hash_entry *pos;
+    octo_hash_entry *next;
+    octo_list_foreach(pos, next, list, hash_list)
     {
         if(strncmp((char*)key, (char*)pos->key, min(pos->keylen, keylen)) == 0)
         {
@@ -128,7 +132,7 @@ static inline bool octo_hash_bin_has(octo_hash *hashtable, uint32_t keyhash, uin
  */
 static inline bool octo_hash_has(octo_hash *hashtable, uint8_t *key, size_t keylen)
 {
-    uint32_t keyhash = hashtable->hash_function(key, keylen);
+    uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
     return octo_hash_bin_has(hashtable, keyhash, key, keylen);
 }
 
@@ -138,16 +142,16 @@ static inline bool octo_hash_has(octo_hash *hashtable, uint8_t *key, size_t keyl
  */
 static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
-    uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen);
+    uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable->n_hash_bins, keyhash);
 
     if(octo_list_empty(list))
     {
-        octo_list_add(list, &entry->list);
+        octo_list_add(list, &entry->hash_list);
     }
     else if(!octo_hash_bin_has(hashtable, keyhash, entry->key, entry->keylen))
     {
-        octo_list_add(list, &entry->list);
+        octo_list_add(list, &entry->hash_list);
     }
 }
 
@@ -156,11 +160,11 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
  */
 octo_hash_entry * octo_hash_get(octo_hash *hashtable, uint8_t *key, size_t keylen)
 {
-    uint32_t hash = hash->hash_function(key, keylen);
+    uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable->n_hash_bins, keyhash);
-    octo_hash_entry *pos = list;
-    octo_hash_entry *next = list->next;
-    octo_list_foreach(pos, next, octo_hash_item, hash_list)
+    octo_hash_entry *pos;
+    octo_hash_entry *next;
+    octo_list_foreach(pos, next, list, hash_list)
     {
         if(strncmp((char*)key, (char*)pos->key, min(pos->keylen, keylen)) == 0)
         {
@@ -175,7 +179,7 @@ octo_hash_entry * octo_hash_get(octo_hash *hashtable, uint8_t *key, size_t keyle
  */
 octo_hash_entry * octo_hash_pop(octo_hash *hashtable, uint8_t *key, size_t keylen)
 {
-    uint32_t hash = hash->hash_function(key, keylen);
+    uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
 }
 
 /**
