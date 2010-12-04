@@ -26,6 +26,7 @@
 #include <assert.h>
 
 #include "list.h"
+#include "hash_function.h"
 
 #define min(x, y) ((x)<(y)?(x):(y))
 
@@ -40,8 +41,6 @@
  * modulus operations are very very slow, making hash bin lookups slow!
  *
  */
-
-typedef uint32_t (*octo_hash_function)(const uint8_t *key, const size_t keylen, const uint32_t seed);
 
 typedef struct octo_hash
 {

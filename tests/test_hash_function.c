@@ -4,32 +4,39 @@
     const char bigmsg[] = "/hey/man/nice/shot?what&what;123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235123456123412345612341235";
 
 
-START_TEST (test_murmurhash3_sanity)
+void test_sanity(octo_hash_function func)
 {
     const char url1[] = "/hey/man/nice/shot?what&what;";
     const char url2[] = "/hey/man/nice/shot?what&what;";
     const char url3[] = "/hey/man/nice/shot?what&not&what;";
+    const uint8_t n8 = 10;
+    const uint16_t n16 = 12314;
+    const uint32_t n32 = 123152142;
+    const uint64_t n64 = 400000001231;
     uint32_t hash1 = 0;
     uint32_t hash2 = 0;
     uint32_t hash3 = 0;
 
-    hash1 = octo_hash_murmur3((const uint8_t*)url1, sizeof(url1), 0);
-    hash2 = octo_hash_murmur3((const uint8_t*)url2, sizeof(url2), 0);
-    hash3 = octo_hash_murmur3((const uint8_t*)url3, sizeof(url3), 0);
+    hash1 = func((const uint8_t*)url1, sizeof(url1), 0);
+    hash2 = func((const uint8_t*)url2, sizeof(url2), 0);
+    hash3 = func((const uint8_t*)url3, sizeof(url3), 0);
     
-    printf("hash1 %u hash2 %u hash3 %u\n", hash1, hash2, hash3);
     fail_unless(hash1 == hash2,
         "hashes do not match");
     fail_unless(hash1 != hash3,
         "hashes match");
-}
-END_TEST
 
-START_TEST (test_murmurhash3_speed)
+    /* make sure it works for values smaller than 64 bits */
+    hash1 = func((const uint8_t*)(&n8), sizeof(n8), 0);
+    hash1 = func((const uint8_t*)(&n16), sizeof(n16), 0);
+    hash1 = func((const uint8_t*)(&n32), sizeof(n32), 0);
+    hash1 = func((const uint8_t*)(&n64), sizeof(n64), 0);
+}
+
+void test_speed(octo_hash_function func, const char *name)
 {
     uint32_t hash = 0;
     const size_t count = 10000;
-
 
     struct timeval start, stop, result;
 
@@ -37,71 +44,36 @@ START_TEST (test_murmurhash3_speed)
 
     for(size_t i = 0; i < count; ++i)
     {
-        hash = octo_hash_murmur3((const uint8_t*)bigmsg, sizeof(bigmsg), 0);
+        hash = func((const uint8_t*)bigmsg, sizeof(bigmsg), 0);
     }
     gettimeofday(&stop, NULL);
     timersub(&stop, &start, &result);
 
     double seconds = result.tv_sec + result.tv_usec/1000000.0;
     double megabytes = (sizeof(bigmsg)*count)/(1024.0*1024.0);
-    printf("octo_hash_murmur3 took %f seconds to hash %f megabytes, %f megabytes per second\n", seconds, megabytes, megabytes/seconds);
+    printf("%s : %f megabytes per second\n", name, megabytes/seconds);
 }
-END_TEST
 
-START_TEST (test_x31_sanity)
+
+START_TEST (test_murmurhash3_x64)
 {
-    const char url1[] = "/hey/man/nice/shot?what&what;";
-    const char url2[] = "/hey/man/nice/shot?what&what;";
-    const char url3[] = "/hey/man/nice/shot?what&not&what;";
-    uint32_t hash1 = 0;
-    uint32_t hash2 = 0;
-    uint32_t hash3 = 0;
-
-    hash1 = octo_hash_x31((const uint8_t*)url1, sizeof(url1), 0);
-    hash2 = octo_hash_x31((const uint8_t*)url2, sizeof(url2), 0);
-    hash3 = octo_hash_x31((const uint8_t*)url3, sizeof(url3), 0);
-    
-    printf("hash1 %u hash2 %u hash3 %u\n", hash1, hash2, hash3);
-    fail_unless(hash1 == hash2,
-        "hashes do not match");
-    fail_unless(hash1 != hash3,
-        "hashes match");
+    test_sanity(octo_hash_murmur3_x64);
+    test_speed(octo_hash_murmur3_x64, "murmur3_x64");
 }
 END_TEST
 
-START_TEST (test_x31_speed)
+START_TEST (test_murmurhash3)
 {
-    uint32_t hash = 0;
-    const size_t count = 10000;
-
-
-    struct timeval start, stop, result;
-
-    gettimeofday(&start, NULL);
-
-    for(size_t i = 0; i < count; ++i)
-    {
-        hash = octo_hash_x31((const uint8_t*)bigmsg, sizeof(bigmsg), 0);
-    }
-    gettimeofday(&stop, NULL);
-    timersub(&stop, &start, &result);
-
-    double seconds = result.tv_sec + result.tv_usec/1000000.0;
-    double megabytes = (sizeof(bigmsg)*count)/(1024.0*1024.0);
-    printf("octo_hash_murmur3 took %f seconds to hash %f megabytes, %f megabytes per second\n", seconds, megabytes, megabytes/seconds);
+    test_sanity(octo_hash_murmur3);
+    test_speed(octo_hash_murmur3, "murmur3");
 }
 END_TEST
-
-
-
 
 TCase* octo_hash_function_tcase()
 {
     TCase* tc_octo_hash_function = tcase_create("octo_hash_function");
-    tcase_add_test(tc_octo_hash_function, test_murmurhash3_sanity);
-    tcase_add_test(tc_octo_hash_function, test_murmurhash3_speed);
-    tcase_add_test(tc_octo_hash_function, test_x31_sanity);
-    tcase_add_test(tc_octo_hash_function, test_x31_speed);
+    tcase_add_test(tc_octo_hash_function, test_murmurhash3_x64);
+    tcase_add_test(tc_octo_hash_function, test_murmurhash3);
     return tc_octo_hash_function;
 }
 

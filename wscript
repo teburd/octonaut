@@ -34,10 +34,10 @@ def test(ctx):
         ctx.exec_command(ctx.variant_dir + '/tests/octonaut_tests') 
 
 def valgrindtest(ctx):
-    ctx.exec_command('CK_FORK=no valgrind --leak-check=full -v ./build/tests/octonaut_tests') 
+    ctx.exec_command('CK_FORK=no valgrind --leak-check=full -v ./build/debug/tests/octonaut_tests') 
 
 def gdbtest(ctx):
-    ctx.exec_command('CK_FORK=no gdb ./build/tests/octonaut_tests') 
+    ctx.exec_command('CK_FORK=no gdb ./build/debug/tests/octonaut_tests') 
 
 def build(bld):
     bld.recurse('octonaut')

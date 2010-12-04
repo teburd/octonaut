@@ -31,15 +31,17 @@ START_TEST (test_octo_hash_put_get_remove)
 
     test_hash_struct s1 = 
         {
-            1,
-            { .key = (uint8_t*)32, .keylen = sizeof(int) }
+            .value = 1,
         };
+    s1.hash.key = (uint8_t*)&s1.value;
+    s1.hash.keylen = sizeof(s1.value);
 
     test_hash_struct s2 = 
         {
-            2,
-            {.key = (uint8_t*)44, .keylen = sizeof(int) }
+            .value = 2,
         };
+    s2.hash.key = (uint8_t*)&s2.value;
+    s2.hash.keylen = sizeof(s2.value);
 
     octo_hash_init(&hash, octo_hash_murmur3, 0);
 

@@ -22,6 +22,66 @@
 
 #include "hash_function.h"
 
+#define rotl32(num,amount) (((num) << (amount)) | ((num) >> (32 - (amount))))
+
+#define murmur3_fmix32(h) \
+    do {\
+        h ^= h >> 16;\
+        h *= 0x85ebca6b;\
+        h ^= h >> 13;\
+        h *= 0xc2b2ae35;\
+        h ^= h >> 16;\
+    } while(0)
+
+#define murmur3_bmix32(h1, k1, c1, c2) \
+    do {\
+        k1 *= c1;\
+        k1 = rotl32(k1,11);\
+        k1 *= c2;\
+        h1 ^= k1;\
+        h1 = h1*3+0x52dce729;\
+        c1 = c1*5+0x7b7d159c;\
+        c2 = c2*5+0x6bce6396;\
+    } while(0)
+
+/**
+ * murmurhash3 32 bit hash function
+ */
+uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32_t seed)
+{
+    const int nblocks = keylen / 4;
+    
+    uint32_t h1 = 0x971e137b ^ seed;
+
+    uint32_t c1 = 0x95543787;
+    uint32_t c2 = 0x2ad7eb25;
+
+    const uint32_t *blocks = (const uint32_t *)(key + nblocks*4);
+
+    for(int i = -nblocks; i; ++i)
+    {
+        uint32_t k1 = blocks[i];
+        murmur3_bmix32(h1,k1,c1,c2);
+    }
+
+    const uint8_t *tail = (const uint8_t *)(key + nblocks*4);
+    uint32_t k1 = 0;
+
+    switch(keylen & 3)
+    {
+        case 3: k1 ^= tail[2] << 16;
+        case 2: k1 ^= tail[1] << 8;
+        case 1: k1 ^= tail[0];
+            murmur3_bmix32(h1,k1,c1,c2);
+    }
+
+    h1 ^= keylen;
+    murmur3_fmix32(h1);
+
+    return h1; 
+}
+
+
 #define rotl64(num,amount) (((num) << (amount)) | ((num) >> (64 - (amount))))
 
 #define murmur3_bmix64(h1, h2, k1, k2, c1, c2) \
@@ -58,12 +118,9 @@
 
 
 /**
- * murmurhash3 method of hashing for 64 bit machines
- *
- * taken straight from murmurhash3
- * probably fewer collisions but slower and more complex than x31
+ * murmurhash3 64 bit hash function
  */
-uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32_t seed)
+uint32_t octo_hash_murmur3_x64(const uint8_t *key, const size_t keylen, const uint32_t seed)
 {
     const int nblocks = keylen/16;
 
@@ -128,18 +185,4 @@ uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32
 
     uint32_t* hash = (uint32_t*)&h1;
     return hash[0];
-}
-
-/**
- * x31 hash, very simple and fast, probably lots of collisions
- */
-uint32_t octo_hash_x31(const uint8_t *key, const size_t keylen, const uint32_t seed)
-{
-    uint32_t mkeylen = keylen;
-    uint32_t hash = seed + keylen;
-    for ( ; mkeylen & ~1; mkeylen -= 2, key += 2 )
-        hash = ( ( ( hash * 31 ) + key[0] ) * 31 ) + key[1];
-    if ( mkeylen & 1 )
-        hash = ( hash * 31 ) + key[0];
-    return hash;
 }
