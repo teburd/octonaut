@@ -48,6 +48,12 @@ static void octo_aio_readable(EV_P_ ev_io *watcher, int revents)
  */
 static void octo_aio_writtable(EV_P_ ev_io *watcher, int revents)
 {
+    /* if the buffer is not empty, copy data from the buffer
+     * to the fd
+     */
+
+    /* if the buffer is empty then stop watching for writtable
+     */
 }
 
 void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd, size_t buffer_size)
@@ -61,7 +67,7 @@ void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd, size_t buffer_si
     aio->read_watcher.data = aio;
     aio->write_watcher.data = aio;
     ev_io_init( &aio->read_watcher, octo_aio_readable, aio->fd, EV_READ);
-    ev_io_init( &aio->write_watcher, octo_aio_readable, aio->fd, EV_WRITE);
+    ev_io_init( &aio->write_watcher, octo_aio_writtable, aio->fd, EV_WRITE);
 }
 
 void octo_aio_destroy(octo_aio *aio)
@@ -88,4 +94,22 @@ void octo_aio_stop(octo_aio *aio)
 void octo_aio_write(octo_aio *s, uint8_t *data, size_t len)
 {
     s->write(s->write_ctx, data, len);
+}
+
+
+void octo_aio_buffered_write(octo_aio *s, uint8_t *data, size_t len)
+{
+    /*
+     * write data to a buffer that feeds to a file descriptor
+     */
+}
+
+void octo_aio_direct_write(octo_aio *s, uint8_t *data, size_t len)
+{
+    /*
+     * write to the file descriptor the data, if
+     * the write doesn't fully write all the data then add it to 
+     * a buffer and enable buffered writting until the buffer is
+     * cleared
+     */
 }
