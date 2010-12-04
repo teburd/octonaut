@@ -25,14 +25,14 @@ START_TEST (test_octo_hash_put_get_remove)
         {
             .value = 1,
         };
-    s1.hash.key = (uint8_t*)&s1.value;
+    s1.hash.key = &s1.value;
     s1.hash.keylen = sizeof(s1.value);
 
     test_hash_struct s2 = 
         {
             .value = 2,
         };
-    s2.hash.key = (uint8_t*)&s2.value;
+    s2.hash.key = &s2.value;
     s2.hash.keylen = sizeof(s2.value);
 
     octo_hash_init(&hash, octo_hash_murmur3, 0, 8);

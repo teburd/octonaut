@@ -54,7 +54,7 @@ typedef struct octo_hash_entry
 {
     octo_list hash_list;
     size_t keylen;
-    uint8_t *key;
+    void *key;
 } octo_hash_entry;
 
 static bool power_of_two(uint32_t x)
@@ -127,7 +127,7 @@ static inline size_t octo_hash_size(const octo_hash *hashtable)
 /**
  * check if a bin has an entry
  */
-static inline bool octo_hash_bin_has(octo_hash *hashtable, uint32_t keyhash, uint8_t *key, size_t keylen)
+static inline bool octo_hash_bin_has(octo_hash *hashtable, uint32_t keyhash, void *key, size_t keylen)
 {
     octo_list *list = octo_hash_bin(hashtable, keyhash);
     octo_hash_entry *pos;
@@ -146,7 +146,7 @@ static inline bool octo_hash_bin_has(octo_hash *hashtable, uint32_t keyhash, uin
 /**
  * has an entry
  */
-static inline bool octo_hash_has(octo_hash *hashtable, uint8_t *key, size_t keylen)
+static inline bool octo_hash_has(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
     return octo_hash_bin_has(hashtable, keyhash, key, keylen);
@@ -160,7 +160,7 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
     uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable, keyhash);
-    printf("adding %d to hash table in bin %d\n", (uint32_t)(*entry->key), keyhash);
+    printf("adding %d to hash table in bin %d\n", (uint32_t)(*(uint32_t*)entry->key), keyhash);
     if(octo_list_empty(list))
     {
         printf("bin is empty\n");
@@ -176,7 +176,7 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 /**
  * get an entry from the hash table
  */
-octo_hash_entry * octo_hash_get(octo_hash *hashtable, uint8_t *key, size_t keylen)
+octo_hash_entry * octo_hash_get(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable, keyhash);
@@ -195,7 +195,7 @@ octo_hash_entry * octo_hash_get(octo_hash *hashtable, uint8_t *key, size_t keyle
 /**
  * get and remove an entry from the hash table
  */
-octo_hash_entry * octo_hash_pop(octo_hash *hashtable, uint8_t *key, size_t keylen)
+octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
 }

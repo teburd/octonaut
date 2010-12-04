@@ -47,8 +47,9 @@
 /**
  * murmurhash3 32 bit hash function
  */
-uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32_t seed)
+uint32_t octo_hash_murmur3(const void *vkey, const size_t keylen, const uint32_t seed)
 {
+    const uint8_t *key = (uint8_t *)vkey;
     const int nblocks = keylen / 4;
     
     uint32_t h1 = 0x971e137b ^ seed;
@@ -120,8 +121,9 @@ uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32
 /**
  * murmurhash3 64 bit hash function
  */
-uint32_t octo_hash_murmur3_x64(const uint8_t *key, const size_t keylen, const uint32_t seed)
+uint32_t octo_hash_murmur3_x64(const void *vkey, const size_t keylen, const uint32_t seed)
 {
+    const uint8_t *key = (uint8_t *)vkey;
     const int nblocks = keylen/16;
 
     uint64_t h1 = 0x9368e53c2f6af274^seed;

@@ -26,9 +26,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef uint32_t (*octo_hash_function)(const uint8_t *key, const size_t keylen, const uint32_t seed);
-uint32_t octo_hash_murmur3(const uint8_t *key, const size_t keylen, const uint32_t seed);
-uint32_t octo_hash_murmur3_x64(const uint8_t *key, const size_t keylen, const uint32_t seed);
+typedef uint32_t (*octo_hash_function)(const void *key, const size_t keylen, const uint32_t seed);
+uint32_t octo_hash_murmur3(const void *key, const size_t keylen, const uint32_t seed);
+uint32_t octo_hash_murmur3_x64(const void *key, const size_t keylen, const uint32_t seed);
 
 #endif
 
