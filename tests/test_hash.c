@@ -3,15 +3,10 @@
 
 START_TEST (test_octo_hash_create)
 {
-    octo_hash hash = {
-        .n_hash_bins = 1024
-    };
+    octo_hash hash;
 
-    hash.hash_bins = malloc(sizeof(octo_list)*1024);
+    octo_hash_init(&hash, octo_hash_murmur3, 0, 4); 
 
-    octo_hash_init(&hash, octo_hash_murmur3, 0); 
-
-    free(hash.hash_bins);
     octo_hash_destroy(&hash);
 }
 END_TEST
@@ -24,10 +19,7 @@ typedef struct test_hash_struct
 
 START_TEST (test_octo_hash_put_get_remove)
 {
-    octo_hash hash = {
-        .n_hash_bins = 1024
-    };
-    hash.hash_bins = malloc(sizeof(octo_list)*1024);
+    octo_hash hash;
 
     test_hash_struct s1 = 
         {
@@ -43,17 +35,29 @@ START_TEST (test_octo_hash_put_get_remove)
     s2.hash.key = (uint8_t*)&s2.value;
     s2.hash.keylen = sizeof(s2.value);
 
-    octo_hash_init(&hash, octo_hash_murmur3, 0);
+    octo_hash_init(&hash, octo_hash_murmur3, 0, 8);
 
     octo_hash_put(&hash, &s1.hash);
-    octo_hash_put(&hash, &s1.hash);
-
-    octo_hash_entry *entry = octo_hash_get(&hash, (uint8_t*)32, sizeof(int));
+    octo_hash_put(&hash, &s2.hash);
     
+    uint32_t key = 1;
+    octo_hash_entry *entry = octo_hash_get(&hash, &key, sizeof(key));
+
+    fail_unless(entry == &(s1.hash),
+        "hash table failed to retrieve correct entry");
+
+    key = 2;
+    entry = octo_hash_get(&hash, &key, sizeof(key));
+
     fail_unless(entry == &(s2.hash),
         "hash table failed to retrieve correct entry");
 
-    free(hash.hash_bins);
+    key = 3;
+    entry = octo_hash_get(&hash, &key, sizeof(key));
+
+    fail_unless(entry == NULL,
+        "hash table failed to retrieve correct entry");
+
     octo_hash_destroy(&hash);
 }
 END_TEST

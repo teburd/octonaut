@@ -65,12 +65,23 @@ static bool power_of_two(uint32_t x)
 /**
  * initialize the hash table, does not allocate any memory
  */
-static inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_function, uint32_t seed)
+static inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_function, uint32_t seed, size_t pow2size)
 {
-    assert(hashtable->n_hash_bins != 0);
-    assert(power_of_two(hashtable->n_hash_bins));
+    assert(pow2size < 32);
     hashtable->hash_function = hash_function;
     hashtable->hash_seed = seed;
+    hashtable->n_hash_bins = (1<<pow2size);
+    printf("creating hash table with %d bins\n", hashtable->n_hash_bins);
+    hashtable->hash_bins = malloc(sizeof(octo_list)*hashtable->n_hash_bins);
+
+    for(size_t i = 0; i < hashtable->n_hash_bins; ++i)
+    {
+        octo_list_init(&hashtable->hash_bins[i]);
+    }
+
+    assert(hashtable->n_hash_bins != 0);
+    assert(power_of_two(hashtable->n_hash_bins));
+
 }
 
 /**
@@ -78,6 +89,11 @@ static inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_
  */
 static inline void octo_hash_destroy(octo_hash *hashtable)
 {
+    hashtable->hash_function = NULL;
+    hashtable->hash_seed = 0;
+    hashtable->n_hash_bins = 0;
+    free(hashtable->hash_bins);
+    hashtable->hash_bins = NULL;
 }
 
 /**
@@ -94,7 +110,8 @@ static inline uint32_t octo_hash_nbin(uint32_t bins, uint32_t keyhash)
 static inline octo_list * octo_hash_bin(octo_hash *hashtable, uint32_t keyhash)
 {
     uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
-    return &hashtable->hash_bins[nbin];
+    assert(nbin < hashtable->n_hash_bins);
+    return &(hashtable->hash_bins[nbin]);
 }
 
 static inline size_t octo_hash_size(const octo_hash *hashtable)
@@ -143,13 +160,15 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
     uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable, keyhash);
-
+    printf("adding %d to hash table in bin %d\n", (uint32_t)(*entry->key), keyhash);
     if(octo_list_empty(list))
     {
+        printf("bin is empty\n");
         octo_list_add(list, &entry->hash_list);
     }
     else if(!octo_hash_bin_has(hashtable, keyhash, entry->key, entry->keylen))
     {
+        printf("bin is not empty\n");
         octo_list_add(list, &entry->hash_list);
     }
 }
