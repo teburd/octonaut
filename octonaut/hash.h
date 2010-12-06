@@ -198,6 +198,19 @@ octo_hash_entry * octo_hash_get(octo_hash *hashtable, void *key, size_t keylen)
 octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
+    octo_list *list = octo_hash_bin(hashtable, keyhash);
+    octo_hash_entry *pos;
+    octo_hash_entry *next;
+    octo_list_foreach(pos, next, list, hash_list)
+    {
+        if(strncmp((char*)key, (char*)pos->key, min(pos->keylen, keylen)) == 0)
+        {
+            octo_list_remove(&pos->hash_list);
+            return pos;
+        }
+    }
+
+    return NULL;
 }
 
 /**
