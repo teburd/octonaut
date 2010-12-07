@@ -71,7 +71,6 @@ static inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_
     hashtable->hash_function = hash_function;
     hashtable->hash_seed = seed;
     hashtable->n_hash_bins = (1<<pow2size);
-    printf("creating hash table with %d bins\n", hashtable->n_hash_bins);
     hashtable->hash_bins = malloc(sizeof(octo_list)*hashtable->n_hash_bins);
 
     for(size_t i = 0; i < hashtable->n_hash_bins; ++i)
@@ -160,15 +159,12 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
     uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable, keyhash);
-    printf("adding %d to hash table in bin %d\n", (uint32_t)(*(uint32_t*)entry->key), keyhash);
     if(octo_list_empty(list))
     {
-        printf("bin is empty\n");
         octo_list_add(list, &entry->hash_list);
     }
     else if(!octo_hash_bin_has(hashtable, keyhash, entry->key, entry->keylen))
     {
-        printf("bin is not empty\n");
         octo_list_add(list, &entry->hash_list);
     }
 }
