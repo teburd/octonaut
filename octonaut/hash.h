@@ -23,6 +23,7 @@
 #ifndef OCTO_HASH_H
 #define OCTO_HASH_H
 
+#include <string.h>
 #include <assert.h>
 
 #include "list.h"

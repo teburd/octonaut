@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+def build(bld):
+    bld(
+        features='c cprogram',
+        source = 'httpfork.c',
+        target = 'httpfork',
+        use = ['ev', 'octonaut'])

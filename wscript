@@ -47,6 +47,7 @@ def gdbtest(ctx):
 def build(bld):
     bld.recurse('octonaut')
     bld.recurse('tests')
+    bld.recurse('examples')
     bld.options.all_tests = True
     bld.add_post_fun(test)
 
