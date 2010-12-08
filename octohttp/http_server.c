@@ -20,21 +20,28 @@
  * THE SOFTWARE.
  */
 
-#include <octonaut/aio.h>
+#include "http_server.h"
 
-
-typedef struct http_connection
+void octo_http_server_init(http_server *server, struct ev_loop *loop, int port)
 {
-    octo_aio aio;
-    http_request request;
-    http_resource resource;
-    http_request_cb request_cb
-} http_connection;
+    server->port = port;
+}
 
-typedef struct http_server
+void octo_http_server_destroy(http_server *server)
 {
-    octo_aio aio;
-    int port;
-} http_server;
+    octo_aio_destroy(&server->aio);
+    server->port = 0;
+}
 
+bool octo_http_server_serve(http_server *server)
+{
+    /* open a socket to listen on the given port */
 
+    /* setup aio to use the given socket and when readable call accept()
+     * and setup a octo_http_connection for it
+     */
+
+    /**
+     * return true if things are hosted properly, false otherwise
+     */
+}

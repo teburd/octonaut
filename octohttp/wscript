@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+def build(bld):
+    bld.stlib(
+        source = ['http_parser.c'],
+        target = 'octohttp',
+        export_includes = [".", ".."])
