@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
+#include <assert.h>
 
 #include "aio.h"
 
@@ -56,12 +58,11 @@ static void octo_aio_writtable(EV_P_ ev_io *watcher, int revents)
      */
 }
 
-void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd, size_t buffer_size)
+void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd)
 {
     aio->loop = loop;
-    aio->buffer_size = buffer_size;
-    aio->buffer = malloc(buffer_size);
     aio->fd = fd;
+    octo_buffer_init(&aio->write_buffer);
     fcntl(aio->fd, F_SETFL, O_NONBLOCK);
     
     aio->read_watcher.data = aio;
@@ -75,10 +76,9 @@ void octo_aio_destroy(octo_aio *aio)
     ev_io_stop(aio->loop, &aio->read_watcher);
     ev_io_stop(aio->loop, &aio->write_watcher);
 
-    aio->loop = NULL;
-    aio->buffer_size = 0;
-    free(aio->buffer);
+    octo_buffer_destroy(&aio->write_buffer);
     aio->fd = -1;
+    aio->loop = NULL;
 }
 
 void octo_aio_start(octo_aio *aio)
@@ -91,20 +91,23 @@ void octo_aio_stop(octo_aio *aio)
     ev_io_stop(aio->loop, &aio->read_watcher);
 }
 
-void octo_aio_write(octo_aio *s, uint8_t *data, size_t len)
+ssize_t octo_aio_write(octo_aio *s, uint8_t *data, size_t len)
 {
-    s->write(s->write_ctx, data, len);
+    return s->write(s->write_ctx, data, len);
 }
 
-
-void octo_aio_buffered_write(octo_aio *s, uint8_t *data, size_t len)
+ssize_t octo_aio_buffered_write(octo_aio *s, uint8_t *data, size_t len)
 {
     /*
      * write data to a buffer that feeds to a file descriptor
      */
+    assert((ssize_t)len != -1);
+
+    ssize_t result = octo_buffer_write(&s->write_buffer, data, len);
+    return result;
 }
 
-void octo_aio_direct_write(octo_aio *s, uint8_t *data, size_t len)
+ssize_t octo_aio_direct_write(octo_aio *s, uint8_t *data, size_t len)
 {
     /*
      * write to the file descriptor the data, if
@@ -112,4 +115,14 @@ void octo_aio_direct_write(octo_aio *s, uint8_t *data, size_t len)
      * a buffer and enable buffered writting until the buffer is
      * cleared
      */
+    assert((ssize_t)len != -1);
+
+    ssize_t result = write(s->fd, data, len);
+
+    if(result == -1)
+    {
+        perror("write");
+    }
+
+    return result;
 }

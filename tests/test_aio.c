@@ -8,17 +8,13 @@ START_TEST (test_octo_aio_create)
     struct ev_loop *loop = EV_DEFAULT;
    
     int fd = fileno(stdin);
-    octo_aio_init(&aio, loop, fd, 128); 
+    octo_aio_init(&aio, loop, fd); 
     
-    fail_unless(aio.buffer_size == 128,
-        "buffer size not set correctly by aio_init");
     fail_unless(aio.fd == fd,
         "fd not set correctly by aio_init");
 
     octo_aio_destroy(&aio);
 
-    fail_unless(aio.buffer_size == 0,
-        "buffer_size not reset by aio_destroy");
     fail_unless(aio.fd == -1,
         "fd not reset by aio_destroy");
 }
@@ -30,7 +26,7 @@ START_TEST (test_octo_aio_start)
 
     struct ev_loop *loop = EV_DEFAULT;
     
-    octo_aio_init(&aio, loop, 0, 128); 
+    octo_aio_init(&aio, loop, 0); 
 
     octo_aio_start(&aio);
 
@@ -65,8 +61,8 @@ START_TEST (test_octo_aio_pipe)
 
     fail_unless(pipe(pipefds) != -1);
 
-    octo_aio_init(&aios[0], loop, pipefds[0], 128);
-    octo_aio_init(&aios[1], loop, pipefds[1], 128);
+    octo_aio_init(&aios[0], loop, pipefds[0]);
+    octo_aio_init(&aios[1], loop, pipefds[1]);
    
     aios[0].read = mock_rw_cb;
     aios[0].read_ctx = &ctx;

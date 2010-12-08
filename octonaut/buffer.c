@@ -22,6 +22,7 @@
 
 #include "buffer.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -49,6 +50,13 @@ static inline octo_buffer_item * octo_buffer_item_alloc(size_t len)
     octo_buffer_item *item;
 
     item = malloc(sizeof(octo_buffer_item) + len);
+
+    if(item == NULL)
+    {
+        perror("malloc");
+        return NULL;
+    }
+
     item->start = 0;
     item->size = 0;
     item->capacity = len;
@@ -130,6 +138,10 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
     else
     {
         item = octo_buffer_item_alloc(CHUNK_SIZE);
+        if(item == NULL)
+        {
+            return copied;
+        }
         octo_list_push(&b->buffer_list, &item->list);
     }
 
@@ -147,6 +159,10 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
         if(copied < len)
         {
             item = octo_buffer_item_alloc(CHUNK_SIZE);
+            if(item == NULL)
+            {
+                return copied;
+            }
             octo_list_push(&b->buffer_list, &item->list);
         }
     }

@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <ev.h>
 
+#include "buffer.h"
+
 /**
  * octo_aio error
  *
@@ -32,7 +34,7 @@
  */
 typedef struct octo_aio_error
 {
-    int errno;
+    int error;
 } octo_aio_error;
 
 /**
@@ -44,7 +46,7 @@ typedef struct octo_aio_error
  * call may fail under such circumstances.
  */
 typedef struct octo_aio octo_aio;
-typedef void (*octo_aio_write_cb) (void *ctx, uint8_t *data, size_t len);
+typedef ssize_t (*octo_aio_write_cb) (void *ctx, uint8_t *data, size_t len);
 typedef void (*octo_aio_read_cb) (void *ctx, uint8_t *data, size_t len);
 typedef void (*octo_aio_close_cb) (void *ctx, octo_aio_error *error);
 
@@ -53,20 +55,19 @@ struct octo_aio {
     int fd;
     ev_io read_watcher;
     ev_io write_watcher;
+    octo_buffer write_buffer;
     octo_aio_write_cb write;
     void *write_ctx;
     octo_aio_read_cb read;
     void *read_ctx;
     octo_aio_close_cb close;
     void *close_ctx;
-    size_t buffer_size;
-    uint8_t *buffer;
 };
 
-void octo_aio_init(octo_aio *s, struct ev_loop *loop, int fd, size_t buffer_size);
+void octo_aio_init(octo_aio *s, struct ev_loop *loop, int fd);
 void octo_aio_destroy(octo_aio *s);
 
 void octo_aio_start(octo_aio *s);
 void octo_aio_stop(octo_aio *s);
-void octo_aio_write(octo_aio *s, uint8_t *data, size_t len);
+ssize_t octo_aio_write(octo_aio *s, uint8_t *data, size_t len);
 void octo_aio_close(octo_aio *s);
