@@ -86,8 +86,8 @@ void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd)
 
     aio->read_watcher.data = aio;
     aio->write_watcher.data = aio;
-    ev_io_init( &aio->read_watcher, octo_aio_readable, aio->fd, EV_READ);
-    ev_io_init( &aio->write_watcher, octo_aio_writtable, aio->fd, EV_WRITE);
+    ev_io_init(&aio->read_watcher, octo_aio_readable, aio->fd, EV_READ);
+    ev_io_init(&aio->write_watcher, octo_aio_writtable, aio->fd, EV_WRITE);
 }
 
 void octo_aio_destroy(octo_aio *aio)
