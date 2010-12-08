@@ -26,10 +26,10 @@
 #include "aio.h"
 
 /**
- * Protocol handler
- *
- * Takes a fixed set of possible callbacks to handle events from a octo_aio.
- * May send things back on the octo_aio.
+ * slightly generified interface over aio which allows for protocols
+ * on top of other IO devices besides file descriptors in cases where
+ * there's higher level (or lower level) protocols already to contend with 
+ * such as USB or RS232.
  */
 typedef struct octo_protocol octo_protocol;
 typedef void (*octo_protocol_connected_cb) (octo_protocol *p, char *address);
@@ -40,7 +40,7 @@ struct octo_protocol {
     octo_protocol_connected_cb connected;
     octo_protocol_data_cb data;
     octo_protocol_disconnected_cb disconnected;
-    octo_aio io;
+    octo_aio aio;
 };
 
 /**
