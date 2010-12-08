@@ -94,8 +94,6 @@ START_TEST (test_octo_aio_eagain)
     octo_aio aios[2];
     char* msg = "suck it trabek";
     size_t msg_len = strlen(msg);
-    char buffer[msg_len];
-    size_t read_len = 0;
     mock_ctx ctx;
     ctx.byte_count = 0;
 
@@ -116,7 +114,7 @@ START_TEST (test_octo_aio_eagain)
         "octo_aio_write is not octo_aio_direct_write.");
 
     size_t total= 0;
-    while(aios[1].write == octo_aio_direct_write && total < 1024*1024*1024)
+    while(aios[1].write == octo_aio_direct_write && total < 100*1024)
     {
         octo_aio_write(&aios[1], msg, msg_len);
         total += msg_len;
@@ -128,6 +126,16 @@ START_TEST (test_octo_aio_eagain)
     fail_unless(ev_is_active(&aios[1].write_watcher), 
         "octo_aio_write did not start the write watcher.");
 
+    total= 0;
+    while(total < 100*1024)
+    {
+        octo_aio_write(&aios[1], msg, msg_len);
+        total += msg_len;
+    }
+
+    fail_unless(octo_buffer_size(&aios[1].write_buffer) > 99*1024,
+        "octo_aio write buffer has not been filled in.");
+
     size_t count = 0;
     while(octo_buffer_size(&aios[1].write_buffer) != 0 && count < 1000)
     {
@@ -135,7 +143,7 @@ START_TEST (test_octo_aio_eagain)
         ev_run(loop, EVRUN_ONCE);
     }
 
-    fail_unless(octo_buffer_size(&aios[1].write_buffer) != 0,
+    fail_unless(octo_buffer_size(&aios[1].write_buffer) == 0,
         "octo_aio write_buffer is not empty as it should be.");
 
     octo_aio_destroy(&aios[0]);
