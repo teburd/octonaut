@@ -101,17 +101,6 @@ START_TEST (test_octo_buffer_write)
 }
 END_TEST
 
-
-START_TEST (test_octo_buffer_fdwrite)
-{
-    octo_buffer buf;
-
-    octo_buffer_init(&buf, 0); 
-
-    octo_buffer_destroy(&buf);
-}
-END_TEST
-
 START_TEST (test_octo_buffer_read)
 {
     size_t len = 0;
@@ -184,16 +173,6 @@ START_TEST (test_octo_buffer_read)
 
     fail_unless(len == sizeof(mystr) - 10,
         "buffer read did not return correct length");
-
-    octo_buffer_destroy(&buf);
-}
-END_TEST
-
-START_TEST (test_octo_buffer_fdread)
-{
-    octo_buffer buf;
-
-    octo_buffer_init(&buf, 0); 
 
     octo_buffer_destroy(&buf);
 }
@@ -317,9 +296,7 @@ TCase* octo_buffer_tcase()
     tcase_add_test(tc_octo_buffer, test_octo_buffer_init_destroy);
     tcase_add_test(tc_octo_buffer, test_octo_buffer_size);
     tcase_add_test(tc_octo_buffer, test_octo_buffer_write);
-    tcase_add_test(tc_octo_buffer, test_octo_buffer_fdwrite);
-    tcase_add_test(tc_octo_buffer, test_octo_buffer_peek_drain);
     tcase_add_test(tc_octo_buffer, test_octo_buffer_read);
-    tcase_add_test(tc_octo_buffer, test_octo_buffer_fdread);
+    tcase_add_test(tc_octo_buffer, test_octo_buffer_peek_drain);
     return tc_octo_buffer;
 }
