@@ -22,9 +22,23 @@
 
 #include "http_server.h"
 
-void octo_http_server_init(http_server *server, struct ev_loop *loop, int port)
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+static void octo_http_connection_handle(octo_http_connection *connection, 
+    struct ev_loop *loop, int socketfd)
+{
+
+}
+
+void octo_http_server_init(http_server *server, struct ev_loop *loop, int port,
+    int backlog)
 {
     server->port = port;
+    server->backlog = backlog;
 }
 
 void octo_http_server_destroy(http_server *server)
@@ -33,15 +47,42 @@ void octo_http_server_destroy(http_server *server)
     server->port = 0;
 }
 
-bool octo_http_server_serve(http_server *server)
+static void octo_http_server_accept(EV_P_ ev_io *watcher, int revents)
+{
+    http_server *server = watcher->data;
+}
+
+bool octo_http_server_serve(http_server *server, int backlog)
 {
     /* open a socket to listen on the given port */
+    struct sockaddr_in serv_addr;
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if(fd < 0)
+    {
+        perror("socket");
+        return false;
+    }
 
-    /* setup aio to use the given socket and when readable call accept()
-     * and setup a octo_http_connection for it
+    bzero((char*) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(server->port);
+
+    if(bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+    {
+        perror("bind");
+        return false;
+    }
+
+    listen(sockfd, 500);
+
+    /**
+     * setup a read watcher which accepts on new connections
      */
 
     /**
      * return true if things are hosted properly, false otherwise
      */
+
+    return true;
 }

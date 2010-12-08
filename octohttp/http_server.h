@@ -35,9 +35,10 @@ typedef struct octo_http_server
 {
     octo_aio aio;
     int port;
+    int backlog;
 } octo_http_server;
 
-void octo_http_server_init(http_server *server, struct ev_loop *loop, int port);
+void octo_http_server_init(http_server *server, struct ev_loop *loop, int port, int backlog);
 void octo_http_server_destroy(http_server *server);
 
 bool octo_http_server_serve(http_server *server);
