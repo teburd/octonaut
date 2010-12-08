@@ -53,9 +53,25 @@ static void octo_aio_writtable(EV_P_ ev_io *watcher, int revents)
     /* if the buffer is not empty, copy data from the buffer
      * to the fd
      */
+    uint8_t buffer[4096];
+    octo_aio *aio = (octo_aio*)watcher->data;
+    size_t len = octo_buffer_peek(&aio->write_buffer, buffer, 4096);
+    ssize_t result = write(aio->fd, buffer, len);
 
-    /* if the buffer is empty then stop watching for writtable
-     */
+    if(result == -1 && errno != EAGAIN)
+    {
+        perror("write");
+    }
+    else if(result != -1)
+    {
+        octo_buffer_drain(&aio->write_buffer, len);
+    }
+
+    if(octo_buffer_size(&aio->write_buffer) == 0)
+    {
+        aio->write = octo_aio_direct_write;
+        ev_io_stop(loop, watcher);
+    }
 }
 
 void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd)
@@ -113,7 +129,7 @@ ssize_t octo_aio_buffered_write(void *ctx, void *data, size_t len)
     return result;
 }
 
-ssize_t octo_aio_direct_write(void *ctx, void *data, size_t len)
+ssize_t octo_aio_direct_write(void *ctx, void *rawdata, size_t len)
 {
     /*
      * write to the file descriptor the data, if
@@ -123,8 +139,9 @@ ssize_t octo_aio_direct_write(void *ctx, void *data, size_t len)
      */
 
     assert((ssize_t)len != -1);
-
+    
     octo_aio *aio = (octo_aio*)ctx;
+    uint8_t *data = (uint8_t*)rawdata;
 
     ssize_t result = write(aio->fd, data, len);
 
