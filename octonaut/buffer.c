@@ -124,8 +124,9 @@ size_t octo_buffer_size(const octo_buffer *b)
     return b->size;
 }
 
-size_t octo_buffer_write(octo_buffer *b, void *data, size_t len)
+size_t octo_buffer_write(octo_buffer *b, void *rawdata, size_t len)
 {
+    uint8_t *data = (uint8_t *)rawdata;
     size_t copylen = 0;
     size_t copied = 0;
     octo_buffer_item *item = NULL;
@@ -171,8 +172,9 @@ size_t octo_buffer_write(octo_buffer *b, void *data, size_t len)
     return copied;
 }
 
-size_t octo_buffer_read(octo_buffer *b, void *data, size_t len)
+size_t octo_buffer_read(octo_buffer *b, void *rawdata, size_t len)
 {
+    uint8_t *data = (uint8_t *)rawdata;
     size_t copied = 0;
     size_t copylen = 0;
 
@@ -203,8 +205,9 @@ size_t octo_buffer_read(octo_buffer *b, void *data, size_t len)
     return copied;
 }
 
-size_t octo_buffer_peek(octo_buffer *b, void *data, size_t len)
+size_t octo_buffer_peek(octo_buffer *b, void *rawdata, size_t len)
 {
+    uint8_t *data = (uint8_t *)rawdata;
     size_t copied = 0;
     size_t copylen = 0;
 
@@ -225,11 +228,48 @@ size_t octo_buffer_peek(octo_buffer *b, void *data, size_t len)
         if(copied >= octo_buffer_item_size(item))
         {
             tail = tail->prev;
-            item = octo_list_entry(tail, octo_buffer_item, list);
+            if(tail != &b->buffer_list)
+            {
+                item = octo_list_entry(tail, octo_buffer_item, list);
+            }
+            else
+            {
+                return copied;
+            }
         }
     }
 
-    b->size -= copied;
     return copied;
 
+}
+
+size_t octo_buffer_drain(octo_buffer *b, size_t len)
+{
+    size_t drained = 0;
+    size_t drainlen = 0;
+
+    while(drained < len)
+    {
+        octo_list *tail = octo_list_tail(&b->buffer_list);
+
+        if(tail == &b->buffer_list)
+        {
+            break;
+        }
+
+        octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
+        drainlen = min(len-drained, octo_buffer_item_size(item));
+        drained += drainlen;
+
+        item->start += drainlen;
+        item->size -= drainlen;
+
+        if(octo_buffer_item_size(item) == 0)
+        {
+            octo_buffer_item_free(item);
+        }
+    }
+
+    b->size -= drained;
+    return drained;
 }

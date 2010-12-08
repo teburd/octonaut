@@ -87,7 +87,7 @@ size_t octo_buffer_write(octo_buffer *b, void *data, size_t len);
  *
  * return number of bytes written
  */
-size_t octo_buffer_fwrite(octo_buffer *b, int fd, size_t len);
+size_t octo_buffer_fdwrite(octo_buffer *b, int fd, size_t len);
 
 /**
  * read from the buffer to a memory location at most len bytes.
@@ -101,7 +101,7 @@ size_t octo_buffer_read(octo_buffer *b, void *data, size_t len);
  *
  * return the number of bytes read.
  */
-size_t octo_buffer_fread(octo_buffer *b, int fd, size_t len);
+size_t octo_buffer_fdread(octo_buffer *b, int fd, size_t len);
 
 /**
  * peek in to the buffer at most len bytes.
