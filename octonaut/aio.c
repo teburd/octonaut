@@ -64,7 +64,10 @@ void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd)
     aio->fd = fd;
     octo_buffer_init(&aio->write_buffer);
     fcntl(aio->fd, F_SETFL, O_NONBLOCK);
-    
+  
+    aio->write_ctx = aio;
+    aio->write = octo_aio_direct_write;
+
     aio->read_watcher.data = aio;
     aio->write_watcher.data = aio;
     ev_io_init( &aio->read_watcher, octo_aio_readable, aio->fd, EV_READ);
@@ -91,23 +94,26 @@ void octo_aio_stop(octo_aio *aio)
     ev_io_stop(aio->loop, &aio->read_watcher);
 }
 
-ssize_t octo_aio_write(octo_aio *s, uint8_t *data, size_t len)
+ssize_t octo_aio_write(octo_aio *aio, void *data, size_t len)
 {
-    return s->write(s->write_ctx, data, len);
+    return aio->write(aio->write_ctx, data, len);
 }
 
-ssize_t octo_aio_buffered_write(octo_aio *s, uint8_t *data, size_t len)
+ssize_t octo_aio_buffered_write(void *ctx, void *data, size_t len)
 {
     /*
      * write data to a buffer that feeds to a file descriptor
      */
     assert((ssize_t)len != -1);
 
-    ssize_t result = octo_buffer_write(&s->write_buffer, data, len);
+
+    octo_aio *aio = (octo_aio*)ctx;
+
+    ssize_t result = octo_buffer_write(&aio->write_buffer, data, len);
     return result;
 }
 
-ssize_t octo_aio_direct_write(octo_aio *s, uint8_t *data, size_t len)
+ssize_t octo_aio_direct_write(void *ctx, void *data, size_t len)
 {
     /*
      * write to the file descriptor the data, if
@@ -115,13 +121,37 @@ ssize_t octo_aio_direct_write(octo_aio *s, uint8_t *data, size_t len)
      * a buffer and enable buffered writting until the buffer is
      * cleared
      */
+
     assert((ssize_t)len != -1);
 
-    ssize_t result = write(s->fd, data, len);
+    octo_aio *aio = (octo_aio*)ctx;
+
+    ssize_t result = write(aio->fd, data, len);
 
     if(result == -1)
     {
-        perror("write");
+        if(errno == EAGAIN)
+        {
+            ev_io_start(aio->loop, &aio->write_watcher);
+            aio->write = octo_aio_buffered_write;
+            result = aio->write(aio, data, len);
+            assert(result == len);
+            return result;
+        }
+        else
+        {
+            perror("write");
+            return result;
+        }
+    }
+    
+    if(result < len)
+    {
+        ev_io_start(aio->loop, &aio->write_watcher);
+        aio->write = octo_aio_buffered_write;
+        size_t bresult = aio->write(aio, &data[result], len - result);
+        assert(bresult == (len - result));
+        return len;
     }
 
     return result;

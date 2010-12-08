@@ -124,7 +124,7 @@ size_t octo_buffer_size(const octo_buffer *b)
     return b->size;
 }
 
-size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
+size_t octo_buffer_write(octo_buffer *b, void *data, size_t len)
 {
     size_t copylen = 0;
     size_t copied = 0;
@@ -171,7 +171,7 @@ size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len)
     return copied;
 }
 
-size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
+size_t octo_buffer_read(octo_buffer *b, void *data, size_t len)
 {
     size_t copied = 0;
     size_t copylen = 0;
@@ -203,7 +203,7 @@ size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len)
     return copied;
 }
 
-size_t octo_buffer_peek(octo_buffer *b, uint8_t *data, size_t len)
+size_t octo_buffer_peek(octo_buffer *b, void *data, size_t len)
 {
     size_t copied = 0;
     size_t copylen = 0;

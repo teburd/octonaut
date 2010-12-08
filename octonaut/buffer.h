@@ -80,7 +80,7 @@ size_t octo_buffer_items(const octo_buffer *b);
  *
  * return number of bytes written
  */
-size_t octo_buffer_write(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_write(octo_buffer *b, void *data, size_t len);
 
 /**
  * write to the buffer from a file descriptor at most len bytes
@@ -94,7 +94,7 @@ size_t octo_buffer_fwrite(octo_buffer *b, int fd, size_t len);
  *
  * return the number of bytes read.
  */
-size_t octo_buffer_read(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_read(octo_buffer *b, void *data, size_t len);
 
 /**
  * read from the buffer to a file descriptor at most len bytes.
@@ -111,7 +111,7 @@ size_t octo_buffer_fread(octo_buffer *b, int fd, size_t len);
  *
  * return the actual number of bytes read.
  */
-size_t octo_buffer_peek(octo_buffer *b, uint8_t *data, size_t len);
+size_t octo_buffer_peek(octo_buffer *b, void *data, size_t len);
 
 /**
  * remove from the buffer at most len bytes.

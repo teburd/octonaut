@@ -46,8 +46,8 @@ typedef struct octo_aio_error
  * call may fail under such circumstances.
  */
 typedef struct octo_aio octo_aio;
-typedef ssize_t (*octo_aio_write_cb) (void *ctx, uint8_t *data, size_t len);
-typedef void (*octo_aio_read_cb) (void *ctx, uint8_t *data, size_t len);
+typedef ssize_t (*octo_aio_write_cb) (void *ctx, void *data, size_t len);
+typedef void (*octo_aio_read_cb) (void *ctx, void *data, size_t len);
 typedef void (*octo_aio_close_cb) (void *ctx, octo_aio_error *error);
 
 struct octo_aio {
@@ -69,5 +69,13 @@ void octo_aio_destroy(octo_aio *s);
 
 void octo_aio_start(octo_aio *s);
 void octo_aio_stop(octo_aio *s);
-ssize_t octo_aio_write(octo_aio *s, uint8_t *data, size_t len);
+ssize_t octo_aio_write(octo_aio *s, void *data, size_t len);
 void octo_aio_close(octo_aio *s);
+
+
+/**
+ * buffered and direct write callbacks, the defaults but can be
+ * changed as desired!
+ */
+ssize_t octo_aio_buffered_write(void *ctx, void *data, size_t len);
+ssize_t octo_aio_direct_write(void *ctx, void *data, size_t len);

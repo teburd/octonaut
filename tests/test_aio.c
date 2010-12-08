@@ -39,7 +39,7 @@ typedef struct mock_ctx
     int byte_count;
 } mock_ctx;
 
-void mock_rw_cb(void *ctx, uint8_t *data, size_t len)
+void mock_rw_cb(void *ctx, void *data, size_t len)
 {
     mock_ctx *mctx = (mock_ctx*)ctx;
     mctx->byte_count += len;
@@ -88,11 +88,68 @@ START_TEST (test_octo_aio_pipe)
 }
 END_TEST
 
+START_TEST (test_octo_aio_eagain)
+{
+    int pipefds[2];
+    octo_aio aios[2];
+    char* msg = "suck it trabek";
+    size_t msg_len = strlen(msg);
+    char buffer[msg_len];
+    size_t read_len = 0;
+    mock_ctx ctx;
+    ctx.byte_count = 0;
+
+    struct ev_loop *loop = EV_DEFAULT;
+
+    fail_unless(pipe(pipefds) != -1);
+
+    octo_aio_init(&aios[0], loop, pipefds[0]);
+    octo_aio_init(&aios[1], loop, pipefds[1]);
+   
+    aios[0].read = mock_rw_cb;
+    aios[0].read_ctx = &ctx;
+    octo_aio_start(&aios[0]);
+    
+    octo_aio_start(&aios[1]);
+
+    fail_unless(aios[1].write == octo_aio_direct_write,
+        "octo_aio_write is not octo_aio_direct_write.");
+
+    size_t total= 0;
+    while(aios[1].write == octo_aio_direct_write && total < 1024*1024*1024)
+    {
+        octo_aio_write(&aios[1], msg, msg_len);
+        total += msg_len;
+    }
+
+    fail_unless(aios[1].write == octo_aio_buffered_write,
+        "octo_aio_write did not switch to buffered writing.");
+
+    fail_unless(ev_is_active(&aios[1].write_watcher), 
+        "octo_aio_write did not start the write watcher.");
+
+    size_t count = 0;
+    while(octo_buffer_size(&aios[1].write_buffer) != 0 && count < 1000)
+    {
+        count += 1;
+        ev_run(loop, EVRUN_ONCE);
+    }
+
+    fail_unless(octo_buffer_size(&aios[1].write_buffer) != 0,
+        "octo_aio write_buffer is not empty as it should be.");
+
+    octo_aio_destroy(&aios[0]);
+    octo_aio_destroy(&aios[1]);
+}
+END_TEST
+
+
 TCase* octo_aio_tcase()
 {
     TCase* tc_octo_aio = tcase_create("octo_aio");
     tcase_add_test(tc_octo_aio, test_octo_aio_create);
     tcase_add_test(tc_octo_aio, test_octo_aio_start);
     tcase_add_test(tc_octo_aio, test_octo_aio_pipe);
+    tcase_add_test(tc_octo_aio, test_octo_aio_eagain);
     return tc_octo_aio;
 }
