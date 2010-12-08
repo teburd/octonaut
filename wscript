@@ -33,6 +33,11 @@ def test(ctx):
     else:
         ctx.exec_command(ctx.variant_dir + '/tests/octonaut_tests') 
 
+def kcovtest(ctx):
+    ctx.exec_command('rm -rf coverage')
+    ctx.exec_command('mkdir -p coverage')
+    ctx.exec_command('CK_FORK=no kcov coverage ./build/debug/tests/octonaut_tests')
+
 def valgrindtest(ctx):
     ctx.exec_command('CK_FORK=no valgrind --leak-check=full -v ./build/debug/tests/octonaut_tests') 
 

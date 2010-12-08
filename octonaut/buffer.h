@@ -46,6 +46,7 @@ typedef struct octo_buffer_item
 typedef struct octo_buffer
 {
     octo_list buffer_list;
+    size_t chunk_size;
     size_t size;
     size_t items; 
 } octo_buffer;
@@ -58,7 +59,7 @@ void octo_init_buffer();
 /**
  * initialize a buffer
  */
-void octo_buffer_init(octo_buffer *b);
+void octo_buffer_init(octo_buffer *b, size_t chunk_size);
 
 /**
  * destroy a buffer

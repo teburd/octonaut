@@ -78,7 +78,7 @@ void octo_aio_init(octo_aio *aio, struct ev_loop *loop, int fd)
 {
     aio->loop = loop;
     aio->fd = fd;
-    octo_buffer_init(&aio->write_buffer);
+    octo_buffer_init(&aio->write_buffer, 0);
     fcntl(aio->fd, F_SETFL, O_NONBLOCK);
   
     aio->write_ctx = aio;

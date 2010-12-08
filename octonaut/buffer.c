@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CHUNK_SIZE 4096 
+#define DEFAULT_CHUNK_SIZE 4096
 
 #define min(x, y) ((x)<(y)?(x):(y))
 #define max(x, y) ((x)<(y)?(x):(y))
@@ -99,9 +99,17 @@ static inline size_t octo_buffer_item_remaining(octo_buffer_item *item)
     return item->capacity - (item->size + item->start);
 }
 
-void octo_buffer_init(octo_buffer *b)
+void octo_buffer_init(octo_buffer *b, size_t chunk_size)
 {
     octo_list_init(&b->buffer_list);
+    if(chunk_size)
+    {
+        b->chunk_size = chunk_size;
+    }
+    else
+    {
+        b->chunk_size = DEFAULT_CHUNK_SIZE;
+    }
     b->size = 0;
 }
 
@@ -138,7 +146,7 @@ size_t octo_buffer_write(octo_buffer *b, void *rawdata, size_t len)
     }
     else
     {
-        item = octo_buffer_item_alloc(CHUNK_SIZE);
+        item = octo_buffer_item_alloc(b->chunk_size);
         if(item == NULL)
         {
             return copied;
@@ -159,7 +167,7 @@ size_t octo_buffer_write(octo_buffer *b, void *rawdata, size_t len)
 
         if(copied < len)
         {
-            item = octo_buffer_item_alloc(CHUNK_SIZE);
+            item = octo_buffer_item_alloc(b->chunk_size);
             if(item == NULL)
             {
                 return copied;
