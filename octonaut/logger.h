@@ -86,4 +86,13 @@ void octo_logger_log(octo_logger *lgr, octo_log_level level, const char *where, 
 #define octo_logger_error(logger, ...) \
     octo_logger_log(&logger, LOG_ERROR, __func__, __VA_ARGS__)
 
+#define octo_logger_init_debug(logger, name) \
+    do { \
+        octo_logger_init(&logger, "httpfork"); \
+        octo_logger_add_output(&logger, LOG_DEBUG, stdout, true); \
+        octo_logger_add_output(&logger, LOG_INFO, stdout, true); \
+        octo_logger_add_output(&logger, LOG_WARN, stdout, true); \
+        octo_logger_add_output(&logger, LOG_ERROR, stdout, true); \
+    } while(0) 
+
 #endif

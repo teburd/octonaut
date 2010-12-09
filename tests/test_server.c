@@ -20,7 +20,7 @@ START_TEST (test_octo_server_create)
 }
 END_TEST
 
-START_TEST (test_octo_server_start)
+START_TEST (test_octo_server_serve)
 {
     octo_server server;
 
@@ -40,5 +40,12 @@ START_TEST (test_octo_server_start)
 }
 END_TEST
 
+TCase* octo_server_tcase()
+{
+    TCase* tc_octo_server = tcase_create("octo_server");
+    tcase_add_test(tc_octo_server, test_octo_server_init);
+    tcase_add_test(tc_octo_server, test_octo_server_serve);
+    return tc_octo_server;
+}
 
 
