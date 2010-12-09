@@ -28,16 +28,6 @@
 #include "buffer.h"
 
 /**
- * octo_aio error
- *
- * Error information.
- */
-typedef struct octo_aio_error
-{
-    int error;
-} octo_aio_error;
-
-/**
  * octo_aio 
  *
  * Provides intelligently buffered asynchronous non-blocking IO on a file
@@ -47,7 +37,7 @@ typedef struct octo_aio_error
 typedef struct octo_aio octo_aio;
 typedef ssize_t (*octo_aio_write_cb) (void *ctx, void *data, size_t len);
 typedef void (*octo_aio_read_cb) (void *ctx, void *data, size_t len);
-typedef void (*octo_aio_close_cb) (void *ctx, octo_aio_error *error);
+typedef void (*octo_aio_close_cb) (void *ctx, bool error);
 
 struct octo_aio {
     struct ev_loop *loop;

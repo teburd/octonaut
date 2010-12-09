@@ -20,28 +20,16 @@
  * THE SOFTWARE.
  */
 
-#ifndef OCTO_HTTP_SERVER_H
-#define OCTO_HTTP_SERVER_H
+#ifndef OCTO_ARRAY_H
+#define OCTO_ARRAY_H
 
-#include <stdbool.h>
-#include <ev.h>
-
-#include "http_request.h"
-
-typedef struct octo_http_server
+/**
+ * intrusive resizeable array
+ */
+typedef struct octo_array
 {
-    struct ev_loop *loop;
-    int fd;
-    int port;
-    int backlog;
-    ev_io accept_watcher;
-    void *request_ctx;
-    octo_http_request_cb cb;
-} octo_http_server;
-
-void octo_http_server_init(octo_http_server *server, struct ev_loop *loop,
-    int port, int backlog, octo_http_request_cb cb, void *request_ctx);
-void octo_http_server_destroy(octo_http_server *server);
-bool octo_http_server_serve(octo_http_server *server);
+    size_t size;
+    size_t capacity;
+} octo_array;
 
 #endif

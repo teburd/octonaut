@@ -30,11 +30,6 @@
 typedef struct octo_http_request octo_http_request;
 
 /**
- * callback performed when request is ready
- */
-typedef void (* octo_http_request_cb) (octo_http_request *request);
-
-/**
  * http key/value header pair
  */
 typedef struct octo_http_header
@@ -51,19 +46,12 @@ typedef struct octo_http_header
  */
 struct octo_http_request
 {
-    octo_aio aio;
+    octo_buffer request;
     octo_hash headers;
-    octo_buffer body;
-    ev_timer timer;
-    struct timeval activity;
-    struct timeval touch;
     http_parser parser;
-    octo_http_request_cb request_cb;
 };
 
-/**
- * handle a http request, automatically allocates things as needed.
- * in general it will use some process memory (the memory allocated for
- * static and global variables) before ever touching malloc/free.
- */
-void octo_http_parse_request(int fd, struct sockaddr_in *addr, octo_http_request_cb request_cb);
+void octo_http_request_init(octo_http_request *request);
+void octo_http_request_destroy(octo_http_request *request);
+bool octo_http_request_parse(octo_http_request *request, const char *data, size_t len);
+

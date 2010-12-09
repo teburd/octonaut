@@ -29,11 +29,8 @@
 #include "list.h"
 
 /**
- * A queued buffer with a static pool of buffers to use.
- *
- * Should require very few malloc/free calls!
+ * buffer
  */
-
 typedef struct octo_buffer_item
 {
     octo_list list;

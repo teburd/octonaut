@@ -26,9 +26,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-static octo_logger _logger;
-static octo_logger *logger;
-
+static octo_logger logger;
 
 void stats(EV_P_ ev_timer *w, int revents)
 {
@@ -81,15 +79,17 @@ void server_loop()
 
 int main(int argc, char **argv)
 {
-    logger = &_logger;
-    octo_logger_init(logger, "httpfork");
-    octo_logger_add_output(logger, LOG_DEBUG, stdout, true);
-    octo_logger_add_output(logger, LOG_INFO, stdout, true);
-    octo_logger_add_output(logger, LOG_WARN, stdout, true);
-    octo_logger_add_output(logger, LOG_ERROR, stdout, true);
+    octo_logger *plogger = &logger;
+    octo_logger_init(plogger, "httpfork");
+    octo_logger_add_output(plogger, LOG_DEBUG, stdout, true);
+    octo_logger_add_output(plogger, LOG_INFO, stdout, true);
+    octo_logger_add_output(plogger, LOG_WARN, stdout, true);
+    octo_logger_add_output(plogger, LOG_ERROR, stdout, true);
     octo_logger_info(logger, "octonaut forking http example");
 
     server_loop();
+
+    octo_logger_destroy(plogger);
 
     return 0;
 }

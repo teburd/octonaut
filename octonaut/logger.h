@@ -62,16 +62,28 @@ void octo_logger_set_level(octo_logger *lgr, octo_log_level level);
 
 void octo_logger_log(octo_logger *lgr, octo_log_level level, const char *where, const char *fmt, ...);
 
-#define octo_logger_debug(logger, ...) \
+#define octo_plogger_debug(logger, ...) \
     octo_logger_log(logger, LOG_DEBUG, __func__, __VA_ARGS__)
 
-#define octo_logger_info(logger, ...) \
+#define octo_logger_debug(logger, ...) \
+    octo_logger_log(&logger, LOG_DEBUG, __func__, __VA_ARGS__)
+
+#define octo_plogger_info(logger, ...) \
     octo_logger_log(logger, LOG_INFO, __func__, __VA_ARGS__)
 
-#define octo_logger_warn(logger, ...) \
+#define octo_logger_info(logger, ...) \
+    octo_logger_log(&logger, LOG_INFO, __func__, __VA_ARGS__)
+
+#define octo_plogger_warn(logger, ...) \
     octo_logger_log(logger, LOG_WARN, __func__, __VA_ARGS__)
 
-#define octo_logger_error(logger, ...) \
+#define octo_logger_warn(logger, ...) \
+    octo_logger_log(&logger, LOG_WARN, __func__, __VA_ARGS__)
+
+#define octo_plogger_error(logger, ...) \
     octo_logger_log(logger, LOG_ERROR, __func__, __VA_ARGS__)
+
+#define octo_logger_error(logger, ...) \
+    octo_logger_log(&logger, LOG_ERROR, __func__, __VA_ARGS__)
 
 #endif

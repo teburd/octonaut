@@ -22,12 +22,6 @@
 
 #include "http_request.h"
 
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
 #include <octonaut/common.h>
 
 
@@ -113,20 +107,7 @@ parser_settings = {
     .on_message_complete    = request_message_complete
 };
 
-/**
- * http_request callbacks
- */
-static void request_read(void *ctx, uint8_t *data, size_t len)
-{
-    octo_http_request *request= (octo_http_request *)ctx;
-    http_parser_execute(&request->parser, &parser_settings, (char *)data, len);
-}
-
-static void request_timer(EV_P_ ev_timer *watcher, int revents)
-{
-}
-
-void octo_http_parse_request(int fd, struct sockaddr_in *addr, octo_http_request_cb cb)
+bool octo_http_request_parse(octo_http_request *reqest, const char *data, size_t len)
 {
 }
 

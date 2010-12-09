@@ -8,10 +8,10 @@ START_TEST (test_octo_logger)
     octo_logger_add_output(&logger, LOG_WARN, stdout, true);
     octo_logger_add_output(&logger, LOG_INFO, stdout, true);
     octo_logger_add_output(&logger, LOG_DEBUG, stdout, true);
-    octo_logger_debug(&logger, "log debug");
-    octo_logger_info(&logger, "log info");
-    octo_logger_warn(&logger, "log warn");
-    octo_logger_error(&logger, "log error");
+    octo_logger_debug(logger, "log debug");
+    octo_logger_info(logger, "log info");
+    octo_logger_warn(logger, "log warn");
+    octo_logger_error(logger, "log error");
     octo_logger_destroy(&logger);
 }
 END_TEST

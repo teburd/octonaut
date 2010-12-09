@@ -20,7 +20,52 @@
  * THE SOFTWARE.
  */
 
-#include "protocol.h"
+#ifndef OCTO_SERVER_H
+#define OCTO_SERVER_H
 
-void octo_server_init(octo_server *s);
-void octo_server_destroy(octo_server *s);
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include <ev.h>
+
+#include "logger.h"
+
+
+typedef struct octo_server octo_server;
+
+typedef void (* octo_server_connect_cb)(octo_server *server, int fd,
+    struct sockaddr addr, socklen_t addr_len);
+typedef void (* octo_server_error_cb)(octo_server *server,  int error);
+
+struct octo_server
+{
+    struct ev_loop *loop;
+    octo_logger logger;
+    int fd;
+    int backlog;
+    ev_io read_watcher;
+    octo_server_connect_cb connect;
+    octo_server_error_cb error;
+};
+
+/**
+ * passing in a bound socket results in a listening server
+ * which will call connect when ever a new connection
+ * has been accepted and error if an error occurs.
+ *
+ * Some errors may cause the server to become invalid.
+ * The isactive function should be used to check in such
+ * circumstances.
+ *
+ * Destroying the server results in a octo_server struct
+ * that can be reused or freed as desired.
+ */
+
+void octo_server_init(octo_server *server, struct ev_loop *loop,
+    int backlog, octo_server_connect_cb connect,
+    octo_server_error_cb error);
+bool octo_server_serve(octo_server *server, int fd);
+bool octo_server_isactive(octo_server *server);
+void octo_server_destroy(octo_server *server);
+
+#endif
