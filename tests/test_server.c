@@ -1,42 +1,63 @@
 #include "server.h"
 #include <stdio.h>
 
-START_TEST (test_octo_server_create)
+typedef struct mock_server
 {
     octo_server server;
+    int errors;
+    int connects;
+} mock_server;
+
+bool mock_server_connect(octo_server *server, int fd, struct sockaddr *addr, socklen_t len)
+{
+    octo_logger_debug(server->logger, "connect called");
+    mock_server *mserver = ptr_offset(server, mock_server, server);
+    mserver->connects += 1;
+    close(fd);
+    return true;
+}
+
+bool mock_server_error(octo_server *server)
+{
+    octo_logger_debug(server->logger, "error called");
+    mock_server *mserver = ptr_offset(server, mock_server, server);
+    mserver->connects += 1;
+    mserver->errors += 1;
+    return true;
+}
+
+START_TEST (test_octo_server_init)
+{
+    mock_server server;
 
     struct ev_loop *loop = EV_DEFAULT;
-   
-    int fd = fileno(stdin);
-    octo_server_init(&server, loop, fd); 
+
+    octo_server_init(&server.server, loop, 1,
+            mock_server_connect, mock_server_error); 
+    server.errors = 0;
+    server.connects = 0;
     
-    fail_unless(server.fd == fd,
-        "fd not set correctly by server_init");
-
-    octo_server_destroy(&server);
-
-    fail_unless(server.fd == -1,
-        "fd not reset by server_destroy");
+    octo_server_destroy(&server.server);
 }
 END_TEST
 
 START_TEST (test_octo_server_serve)
 {
-    octo_server server;
+    mock_server server;
 
     struct ev_loop *loop = EV_DEFAULT;
-    
-    octo_server_init(&server, loop, 0); 
-    
-    /* setup a bogus unix socket */
+    octo_server_init(&server.server, loop, 1,
+            mock_server_connect, mock_server_error); 
 
-    /* serve on the socket */
+    /*
+
+    int sockfd = ...
     octo_server_serve(&server, );
 
-    /* loop at least once */
+    */
 
     /* destroy */
-    octo_server_destroy(&server);
+    octo_server_destroy(&server.server);
 }
 END_TEST
 

@@ -23,7 +23,6 @@
 #ifndef OCTO_SERVER_H
 #define OCTO_SERVER_H
 
-#include <sys/types.h>
 #include <sys/socket.h>
 
 #include <ev.h>
@@ -33,14 +32,15 @@
 
 typedef struct octo_server octo_server;
 
-typedef void (* octo_server_connect_cb)(octo_server *server, int fd,
-    struct sockaddr addr, socklen_t addr_len);
-typedef void (* octo_server_error_cb)(octo_server *server,  int error);
+typedef bool (* octo_server_connect_cb)(octo_server *server, int fd,
+    struct sockaddr *addr, socklen_t len);
+typedef bool (* octo_server_error_cb)(octo_server *server);
 
 struct octo_server
 {
     struct ev_loop *loop;
     octo_logger logger;
+    bool active;
     int fd;
     int backlog;
     ev_io read_watcher;
@@ -60,7 +60,6 @@ struct octo_server
  * Destroying the server results in a octo_server struct
  * that can be reused or freed as desired.
  */
-
 void octo_server_init(octo_server *server, struct ev_loop *loop,
     int backlog, octo_server_connect_cb connect,
     octo_server_error_cb error);

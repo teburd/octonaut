@@ -5,13 +5,15 @@
 #include <ev.h>
 #include <check.h>
 
+#include "common.h"
+
 #include "test_list.c"
 #include "test_buffer.c"
 #include "test_hash_function.c"
 #include "test_hash.c"
 #include "test_logger.c"
 #include "test_aio.c"
-
+#include "test_server.c"
 
 Suite* octonaut_suite(void)
 {
@@ -22,6 +24,7 @@ Suite* octonaut_suite(void)
     suite_add_tcase(s, octo_hash_tcase()); 
     suite_add_tcase(s, octo_logger_tcase()); 
     suite_add_tcase(s, octo_aio_tcase()); 
+    suite_add_tcase(s, octo_server_tcase()); 
     return s;
 }
 

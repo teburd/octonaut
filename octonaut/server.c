@@ -36,37 +36,50 @@
 
 static void octo_server_accept(EV_P_ ev_io *watcher, int revents)
 {
-    octo_server *server = ptr_offset(watcher, read_watcher, octo_server);
-    struct sockaddr_in connection_addr;
-    socklen_t conn_addr_len = sizeof(connection_addr);
-    int connfd = accept(server->fd, (struct sockaddr *)&connection_addr, &conn_addr_len);
+    octo_server *server = ptr_offset(watcher, octo_server, read_watcher);
+    struct sockaddr_storage addr;
+    socklen_t len = sizeof(addr);
+
+    int connfd = accept(server->fd, (struct sockaddr *)&addr, &len);
 
     if(connfd < 0)
     {
-        perror("accept");
-        return;
+        if(!server->error(server))
+        {
+            octo_server_destroy(server);
+        }
     }
-
+    else
+    {
+        if(!server->connect(server, connfd, (struct sockaddr *)&addr, len))
+        {
+            octo_server_destroy(server);
+        }
+    }
 }
 
 void octo_server_init(octo_server *server, struct ev_loop *loop,
     int backlog, octo_server_connect_cb connect, octo_server_error_cb error)
 {
+    octo_logger_init(&server->logger, "server");
+    server->active = false;
     server->loop = loop;
-    server->fd = -1;
     server->backlog = backlog;
     server->connect =  connect;
     server->error = error;
+    server->active = false;
 }
 
 void octo_server_destroy(octo_server *server)
 {
-    if(ev_is_active(&server->read_watcher))
+
+    if(server->active)
     {
         ev_io_stop(server->loop, &server->read_watcher);
+        server->active = false;
     }
-
     octo_logger_debug(server->logger, "destroyed server");
+    octo_logger_destroy(&server->logger);
 }
 
 
@@ -76,20 +89,23 @@ bool octo_server_serve(octo_server *server, int fd)
 
     octo_logger_info(server->logger, "serving");
 
-    result = listen(server->fd, server->backlog);
+    result = listen(fd, server->backlog);
     if(result < 0)
     {
         octo_logger_error(server->logger, "listen() failed, %s", strerror(errno));
         return false;
     }
 
-    ev_io_init(&server->read_watcher, octo_server_accept, server->fd, EV_READ);
+    ev_io_init(&server->read_watcher, octo_server_accept, fd, EV_READ);
     ev_io_start(server->loop, &server->read_watcher);
+
+    server->active = true;
 
     return true;
 }
 
 bool octo_server_isactive(octo_server *server)
 {
-    return ev_is_active(&server->read_watcher);
+    return server->active;
 }
+
