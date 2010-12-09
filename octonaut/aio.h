@@ -42,8 +42,7 @@ typedef struct octo_aio_error
  *
  * Provides intelligently buffered asynchronous non-blocking IO on a file
  * descriptor. Buffers on write only when needed otherwise simply writes
- * directly to the socket. The write buffer is limited in size and a write
- * call may fail under such circumstances.
+ * directly to the socket.
  */
 typedef struct octo_aio octo_aio;
 typedef ssize_t (*octo_aio_write_cb) (void *ctx, void *data, size_t len);

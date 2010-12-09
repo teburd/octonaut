@@ -32,20 +32,6 @@
 
 #include <octonaut/common.h>
 
-
-void octo_http_server_init(octo_http_server *server, struct ev_loop *loop, int port,
-    int backlog)
-{
-    server->port = port;
-    server->backlog = backlog;
-}
-
-void octo_http_server_destroy(octo_http_server *server)
-{
-    close(server->fd);
-    server->port = 0;
-}
-
 static void octo_http_server_accept(EV_P_ ev_io *watcher, int revents)
 {
     octo_http_server *server = ptr_offset(watcher, accept_watcher, octo_http_server);
@@ -59,8 +45,24 @@ static void octo_http_server_accept(EV_P_ ev_io *watcher, int revents)
         return;
     }
 
-    close(connfd);
+    octo_http_parse_request(connfd, &connection_addr, server->cb);
 }
+
+void octo_http_server_init(octo_http_server *server, struct ev_loop *loop,
+    int port, int backlog, octo_http_request_cb cb, void *request_ctx)
+{
+    server->port = port;
+    server->backlog = backlog;
+    server->request_ctx = request_ctx;
+    server->cb = cb;
+}
+
+void octo_http_server_destroy(octo_http_server *server)
+{
+    close(server->fd);
+    server->port = 0;
+}
+
 
 bool octo_http_server_serve(octo_http_server *server)
 {

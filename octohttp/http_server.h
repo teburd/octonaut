@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include <ev.h>
 
+#include "http_request.h"
+
 typedef struct octo_http_server
 {
     struct ev_loop *loop;
@@ -33,9 +35,12 @@ typedef struct octo_http_server
     int port;
     int backlog;
     ev_io accept_watcher;
+    void *request_ctx;
+    octo_http_request_cb cb;
 } octo_http_server;
 
-void octo_http_server_init(octo_http_server *server, struct ev_loop *loop, int port, int backlog);
+void octo_http_server_init(octo_http_server *server, struct ev_loop *loop,
+    int port, int backlog, octo_http_request_cb cb, void *request_ctx);
 void octo_http_server_destroy(octo_http_server *server);
 bool octo_http_server_serve(octo_http_server *server);
 
