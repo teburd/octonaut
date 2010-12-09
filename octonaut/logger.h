@@ -47,7 +47,7 @@ typedef struct octo_log_output
 
 typedef struct octo_logger
 {
-    char *name;
+    char name[10];
     octo_log_level level;
     octo_list outs[4];
 } octo_logger;

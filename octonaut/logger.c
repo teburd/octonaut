@@ -34,9 +34,8 @@ void textcolor(FILE* stream, int attr, int fg, int bg)
 void octo_logger_init(octo_logger *lgr, const char *name)
 {
     int i = 0;
-    lgr->name = malloc(strlen(name) + 1);
     lgr->level = 0;
-    strcpy(lgr->name, name);
+    strncpy(lgr->name, name, sizeof(lgr->name)-1);
 
     for(i = 0; i < 4; ++i)
     {
@@ -64,8 +63,6 @@ void octo_logger_destroy(octo_logger *lgr)
         }
 
     }
-
-    free(lgr->name);
 }
 
 /**
