@@ -32,7 +32,7 @@
 #define min(x, y) ((x)<(y)?(x):(y))
 
 /**
- * intrusive hash table store.
+ * intrusive fixed size chained hash table store.
  *
  * choice of hash function is up to the creator of the store.
  * this takes care of retrieving, storing, and removing entries.
@@ -40,6 +40,10 @@
  * it uses power of 2 sizes only to avoid using a true modulus
  * and asserts that the hash table really is power of 2.
  * modulus operations are very very slow, making hash bin lookups slow!
+ *
+ * This hash table is never resized to simplify things. Chaining
+ * is used instead of open addressing. Perhaps an open addressing
+ * version could be made pretty easily.
  *
  */
 
