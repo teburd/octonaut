@@ -28,15 +28,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#define OFFSET(watcher, member, type) (type *) (((char *)watcher) - offsetof(type, member));
-
-static void octo_http_connection_read(void *ctx, uint8_t *data, size_t len)
-{
-    octo_http_connection *conn = (octo_http_connection *)ctx;
-    http_parser_read(conn->http_parser, data, len);
-
-    /* check for errors and lose the connection if any exist */
-}
 
 void octo_http_server_init(http_server *server, struct ev_loop *loop, int port,
     int backlog)
@@ -53,7 +44,7 @@ void octo_http_server_destroy(http_server *server)
 
 static void octo_http_server_accept(EV_P_ ev_io *watcher, int revents)
 {
-    http_server *server = OFFSET(watcher, accept_watcher, http_server);
+    octo_http_server *server = OFFSET(watcher, accept_watcher, octo_http_server);
     struct sockaddr_in connection_addr;
     int connfd = accept(server->fd, &connection_addr, sizeof(connection_addr));
 
@@ -71,7 +62,6 @@ static void octo_http_server_accept(EV_P_ ev_io *watcher, int revents)
 
     ev_timer_init(&conn->http_timeout, octo_http_connection_timeout, 20.0, 0.0);
     ev_timer_start(watcher->loop, &conn->http_timeout);
-
 }
 
 bool octo_http_server_serve(http_server *server)

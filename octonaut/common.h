@@ -20,13 +20,9 @@
  * THE SOFTWARE.
  */
 
-typedef struct octo_http_server
-{
-    int fd;
-    int port;
-    int backlog;
-} octo_http_server;
+#include <stddef.h>
 
-void octo_http_server_init(octo_http_server *server, struct ev_loop *loop, int port, int backlog);
-void octo_http_server_destroy(octo_http_server *server);
-bool octo_http_server_serve(octo_http_server *server);
+/**
+ * macro that obtains a type * from a pointer to a member of type
+ */
+#define ptr_offset(ptr, member, type) (type *) (((char *)ptr) - offsetof(type, member));
