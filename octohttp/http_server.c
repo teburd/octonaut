@@ -28,10 +28,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-static void octo_http_connection_handle(octo_http_connection *connection, 
-    struct ev_loop *loop, int socketfd)
-{
+#define OFFSET(watcher, member, type) (type *) (((char *)watcher) - offsetof(type, member));
 
+static void octo_http_connection_read(void *ctx, uint8_t *data, size_t len)
+{
+    octo_http_connection *conn = (octo_http_connection *)ctx;
+    http_parser_read(conn->http_parser, data, len);
+
+    /* check for errors and lose the connection if any exist */
 }
 
 void octo_http_server_init(http_server *server, struct ev_loop *loop, int port,
@@ -49,10 +53,28 @@ void octo_http_server_destroy(http_server *server)
 
 static void octo_http_server_accept(EV_P_ ev_io *watcher, int revents)
 {
-    http_server *server = watcher->data;
+    http_server *server = OFFSET(watcher, accept_watcher, http_server);
+    struct sockaddr_in connection_addr;
+    int connfd = accept(server->fd, &connection_addr, sizeof(connection_addr));
+
+    if(connfd < 0)
+    {
+        perror("accept");
+        return;
+    }
+    
+    octo_http_connection *conn = malloc(sizeof(octo_http_connection));
+
+    octo_aio_init(&conn->aio, watcher->loop, connfd);
+    conn->read_cb = octo_http_connection_read;
+    conn->read_ctx = conn;
+
+    ev_timer_init(&conn->http_timeout, octo_http_connection_timeout, 20.0, 0.0);
+    ev_timer_start(watcher->loop, &conn->http_timeout);
+
 }
 
-bool octo_http_server_serve(http_server *server, int backlog)
+bool octo_http_server_serve(http_server *server)
 {
     /* open a socket to listen on the given port */
     struct sockaddr_in serv_addr;
@@ -74,15 +96,10 @@ bool octo_http_server_serve(http_server *server, int backlog)
         return false;
     }
 
-    listen(sockfd, 500);
+    listen(sockfd, server->backlog);
 
-    /**
-     * setup a read watcher which accepts on new connections
-     */
-
-    /**
-     * return true if things are hosted properly, false otherwise
-     */
+    ev_io_init(&server->accept_watcher, octo_http_server_accept, sockfd, EV_READ);
+    ev_io_start(server->loop, &server->accept_watcher);
 
     return true;
 }

@@ -62,8 +62,7 @@ void server_loop()
         if(getpid() != server_pid)
         {
             octo_logger_debug(logger, "forked process %d", getpid());
-            worker_loop(i, port);
-            port += 1;
+            worker_loop(i, port + i);
             return;
         }
     }

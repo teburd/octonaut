@@ -26,6 +26,7 @@
 typedef struct octo_http_connection
 {
     octo_aio aio;
+    ev_timer timer;
     http_request request;
     http_resource resource;
     http_request_cb request_cb
