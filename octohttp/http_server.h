@@ -20,13 +20,23 @@
  * THE SOFTWARE.
  */
 
+#ifndef OCTO_HTTP_SERVER_H
+#define OCTO_HTTP_SERVER_H
+
+#include <stdbool.h>
+#include <ev.h>
+
 typedef struct octo_http_server
 {
+    struct ev_loop *loop;
     int fd;
     int port;
     int backlog;
+    ev_io accept_watcher;
 } octo_http_server;
 
 void octo_http_server_init(octo_http_server *server, struct ev_loop *loop, int port, int backlog);
 void octo_http_server_destroy(octo_http_server *server);
 bool octo_http_server_serve(octo_http_server *server);
+
+#endif

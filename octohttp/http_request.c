@@ -28,6 +28,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <octonaut/common.h>
+
 
 /**
  * http_parser callbacks
@@ -65,7 +67,7 @@ static int request_fragment(http_parser *parser,
 
 static int request_header_field(http_parser *parser,
     const char *field,
-    const size_t field len)
+    const size_t len)
 {
     return 0;
 }
@@ -116,24 +118,15 @@ parser_settings = {
  */
 static void request_read(void *ctx, uint8_t *data, size_t len)
 {
-    octo_http_connection *conn = (octo_http_connection *)ctx;
-    http_parser_execute(conn->http_parser, data, len);
+    octo_http_request *request= (octo_http_request *)ctx;
+    http_parser_execute(&request->parser, &parser_settings, (char *)data, len);
 }
 
 static void request_timer(EV_P_ ev_timer *watcher, int revents)
 {
-    /**
-     * timeout occured
-     */
-    octo_http_request *request = ptr_offset(watcher, timer, octo_http_request);
-    octo_aio_destroy(&conn->aio);
-    ev_timer_stop(&conn->timer);
-    free(conn);
 }
 
-void octo_http_request(int fd, struct sockaddr_in *addr, octo_http_request_cb cb)
+void octo_http_parse_request(int fd, struct sockaddr_in *addr, octo_http_request_cb cb)
 {
-    octo_http_request *request = malloc(sizeof(octo_http_request));
-    octo_hash_default_init(
 }
 

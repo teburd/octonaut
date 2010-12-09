@@ -2,6 +2,7 @@
 
 def build(bld):
     bld.stlib(
-        source = ['http_parser.c'],
+        source = ['http_parser.c', 'http_request.c', 'http_server.c'],
         target = 'octohttp',
+        use = ['ev', 'octonaut'],
         export_includes = [".", ".."])

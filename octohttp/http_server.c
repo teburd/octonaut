@@ -22,73 +22,71 @@
 
 #include "http_server.h"
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <octonaut/common.h>
 
-void octo_http_server_init(http_server *server, struct ev_loop *loop, int port,
+
+void octo_http_server_init(octo_http_server *server, struct ev_loop *loop, int port,
     int backlog)
 {
     server->port = port;
     server->backlog = backlog;
 }
 
-void octo_http_server_destroy(http_server *server)
+void octo_http_server_destroy(octo_http_server *server)
 {
-    octo_aio_destroy(&server->aio);
+    close(server->fd);
     server->port = 0;
 }
 
 static void octo_http_server_accept(EV_P_ ev_io *watcher, int revents)
 {
-    octo_http_server *server = OFFSET(watcher, accept_watcher, octo_http_server);
+    octo_http_server *server = ptr_offset(watcher, accept_watcher, octo_http_server);
     struct sockaddr_in connection_addr;
-    int connfd = accept(server->fd, &connection_addr, sizeof(connection_addr));
+    socklen_t conn_addr_len = sizeof(connection_addr);
+    int connfd = accept(server->fd, (struct sockaddr *)&connection_addr, &conn_addr_len);
 
     if(connfd < 0)
     {
         perror("accept");
         return;
     }
-    
-    octo_http_connection *conn = malloc(sizeof(octo_http_connection));
 
-    octo_aio_init(&conn->aio, watcher->loop, connfd);
-    conn->read_cb = octo_http_connection_read;
-    conn->read_ctx = conn;
-
-    ev_timer_init(&conn->http_timeout, octo_http_connection_timeout, 20.0, 0.0);
-    ev_timer_start(watcher->loop, &conn->http_timeout);
+    close(connfd);
 }
 
-bool octo_http_server_serve(http_server *server)
+bool octo_http_server_serve(octo_http_server *server)
 {
     /* open a socket to listen on the given port */
     struct sockaddr_in serv_addr;
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if(fd < 0)
+    server->fd = socket(AF_INET, SOCK_STREAM, 0);
+    if(server->fd < 0)
     {
         perror("socket");
         return false;
     }
 
-    bzero((char*) &serv_addr, sizeof(serv_addr));
+    memset((char*) &serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(server->port);
 
-    if(bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+    if(bind(server->fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
     {
         perror("bind");
         return false;
     }
 
-    listen(sockfd, server->backlog);
+    listen(server->fd, server->backlog);
 
-    ev_io_init(&server->accept_watcher, octo_http_server_accept, sockfd, EV_READ);
+    ev_io_init(&server->accept_watcher, octo_http_server_accept, server->fd, EV_READ);
     ev_io_start(server->loop, &server->accept_watcher);
 
     return true;

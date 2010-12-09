@@ -5,4 +5,4 @@ def build(bld):
         features='c cprogram',
         source = 'httpfork.c',
         target = 'httpfork',
-        use = ['ev', 'octonaut'])
+        use = ['ev', 'octonaut', 'octohttp'])
