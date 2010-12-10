@@ -41,10 +41,12 @@ static void octo_server_accept(EV_P_ ev_io *watcher, int revents)
     struct sockaddr_storage addr;
     socklen_t len = sizeof(addr);
 
+    printf("accepting on socket fd %d\n", server->fd);
     int connfd = accept(server->fd, (struct sockaddr *)&addr, &len);
-
+    
     if(connfd < 0)
     {
+        perror("accept");
         server->error(server);
     }
     else
@@ -83,15 +85,16 @@ bool octo_server_serve(octo_server *server, int fd)
     int result = 0;
 
     octo_logger_info(server->logger, "serving");
+    server->fd = fd;
 
-    result = listen(fd, server->backlog);
+    result = listen(server->fd, server->backlog);
     if(result < 0)
     {
         octo_logger_error(server->logger, "listen() failed, %s", strerror(errno));
         return false;
     }
 
-    ev_io_init(&server->read_watcher, octo_server_accept, fd, EV_READ);
+    ev_io_init(&server->read_watcher, octo_server_accept, server->fd, EV_READ);
     ev_io_start(server->loop, &server->read_watcher);
 
     server->active = true;

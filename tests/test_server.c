@@ -7,7 +7,9 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 
 
 typedef struct mock_server
@@ -19,6 +21,7 @@ typedef struct mock_server
 
 void mock_server_connect(octo_server *server, int fd, struct sockaddr_storage *addr, socklen_t len)
 {
+    printf("connect called\n");
     octo_logger_debug(server->logger, "connect called");
     mock_server *mserver = ptr_offset(server, mock_server, server);
     mserver->connects += 1;
@@ -89,6 +92,26 @@ START_TEST (test_octo_server_serve)
     fail_unless(octo_server_isactive(&server.server),
         "server not active even though it should be");
 
+    int csockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+
+    int flags = fcntl(csockfd, F_GETFL, 0);
+    result = fcntl(csockfd, F_SETFL, flags | O_NONBLOCK);
+
+    fail_unless(result >= 0,
+        "fcntl failed to set the socket to be non-blocking");
+
+    result = connect(csockfd, res->ai_addr, res->ai_addrlen);
+
+    fail_unless(result != EINPROGRESS || result >= 0,
+        strerror(errno));
+
+    ev_run(loop, EVRUN_ONCE);
+
+    fail_unless(server.connects == 1,
+        "server failed to call connect callback");
+
+    close(csockfd);
+
     octo_server_destroy(&server.server);
 
     fail_unless(!octo_server_isactive(&server.server),
@@ -142,11 +165,11 @@ START_TEST (test_octo_server_connect_error)
 
     struct addrinfo hints, *res;
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    result = getaddrinfo(NULL, "7357", &hints, &res);
+    result = getaddrinfo(NULL, "7358", &hints, &res);
     fail_unless(result >= 0,
         gai_strerror(result));
 
