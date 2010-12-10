@@ -135,7 +135,6 @@ START_TEST (test_octo_server_serve_error)
     server.errors = 0;
     server.connects = 0;
 
-
     result = octo_server_serve(&server.server, sockfd);
 
     fail_unless(!result,
