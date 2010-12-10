@@ -26,7 +26,7 @@ extern "C" {
 
 
 #include <sys/types.h>
-#if defined(_WIN32) && !defined(__MINGW32__)
+#ifdef _WIN32
 typedef __int8 int8_t;
 typedef unsigned __int8 uint8_t;
 typedef __int16 int16_t;
@@ -109,8 +109,8 @@ enum http_parser_type { HTTP_REQUEST, HTTP_RESPONSE, HTTP_BOTH };
 
 struct http_parser {
   /** PRIVATE **/
-  unsigned type : 2;
-  unsigned flags : 6;
+  unsigned char type : 2;
+  unsigned char flags : 6;
   unsigned char state;
   unsigned char header_state;
   unsigned char index;

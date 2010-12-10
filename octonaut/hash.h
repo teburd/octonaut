@@ -177,7 +177,7 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 /**
  * get an entry from the hash table
  */
-octo_hash_entry * octo_hash_get(octo_hash *hashtable, void *key, size_t keylen)
+static inline octo_hash_entry * octo_hash_get(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable, keyhash);
@@ -196,7 +196,7 @@ octo_hash_entry * octo_hash_get(octo_hash *hashtable, void *key, size_t keylen)
 /**
  * get and remove an entry from the hash table
  */
-octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, size_t keylen)
+static inline octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable, keyhash);

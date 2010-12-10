@@ -20,6 +20,8 @@
  * THE SOFTWARE.
  */
 
+#include <stdio.h>
+
 #include "http_request.h"
 
 #include <octonaut/common.h>
@@ -37,66 +39,70 @@ enum octo_http_parser_state
  */
 static int request_message_begin(http_parser *parser)
 {
+    printf("message begin\n");
     return 0;
 }
 
 static int request_path(http_parser *parser,
     const char *path, const size_t len)
 {
+    printf("request path\n");
     return 0;
 }
 
 static int request_query(http_parser *parser,
     const char *query, const size_t len)
 {
+    printf("request query\n");
     return 0;
 }
 
 static int request_url(http_parser *parser,
-    const char *url,
-    const size_t len)
+    const char *url, const size_t len)
 {
+    printf("request url\n");
     return 0;
 }
 
 static int request_fragment(http_parser *parser,
-    const char *fragment,
-    const size_t len)
+    const char *fragment, const size_t len)
 {
+    printf("request fragment\n");
     return 0;
 }
 
 static int request_header_field(http_parser *parser,
-    const char *field,
-    const size_t len)
+    const char *field, const size_t len)
 {
+    printf("request header field\n");
     return 0;
 }
 
 static int request_header_value(http_parser *parser,
-    const char *value,
-    const size_t len)
+    const char *value, const size_t len)
 {
+    printf("request header value\n");
     return 0;
 }
 
 static int request_headers_complete(http_parser *parser)
 {
+    printf("request headers complete\n");
     return 0;
 }
 
 static int request_body(http_parser *parser,
-    const char *body,
-    const size_t len)
+    const char *body, const size_t len)
 {
+    printf("request body\n");
     return 0;
 }
 
 static int request_message_complete(http_parser *parser)
 {
-    /**
-     * pass the request to the callback then free() the memory used
-     */
+    printf("request message complete\n");
+    octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = finish;
     return 0;
 }
 
@@ -122,10 +128,21 @@ void octo_http_request_init(octo_http_request *request)
     http_parser_init(&request->parser, HTTP_REQUEST);
 }
 
+void octo_http_request_destroy(octo_http_request *request)
+{
+    octo_list_destroy(&request->header_list);
+    octo_hash_destroy(&request->header_hash);
+}
+
 
 bool octo_http_request_parse(octo_http_request *request, const char *data, size_t len)
 {
-    http_parser_execute(&request->parser, &parser_settings, data, len);
+    size_t parsed = http_parser_execute(&request->parser, &parser_settings, data, len);
+
+    if(parsed != len)
+    {
+        printf("only parsed %zu bytes instead of expected %zu\n", parsed, len);
+    }
 
     if(request->parser_state == finish)
     {
