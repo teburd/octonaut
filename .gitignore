@@ -7,4 +7,4 @@ coverage
 *.un~
 *.swp
 *.pt.py
-
+*~

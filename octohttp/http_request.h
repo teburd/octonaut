@@ -34,7 +34,8 @@ typedef struct octo_http_request octo_http_request;
  */
 typedef struct octo_http_header
 {
-    octo_hash_entry hash_entry;
+    octo_hash_entry header_hash;
+    octo_list header_list;
     char *field;
     size_t field_len;
     char *value;
@@ -57,7 +58,8 @@ typedef enum octo_http_request_state
 struct octo_http_request
 {
     octo_http_request_state state;
-    octo_hash headers;
+    octo_list list_headers;
+    octo_hash hash_headers;
     http_parser parser;
 };
 
