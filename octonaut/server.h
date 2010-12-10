@@ -32,9 +32,9 @@
 
 typedef struct octo_server octo_server;
 
-typedef bool (* octo_server_connect_cb)(octo_server *server, int fd,
-    struct sockaddr *addr, socklen_t len);
-typedef bool (* octo_server_error_cb)(octo_server *server);
+typedef void (* octo_server_connect_cb)(octo_server *server, int fd,
+    struct sockaddr_storage *addr, socklen_t len);
+typedef void (* octo_server_error_cb)(octo_server *server);
 
 struct octo_server
 {

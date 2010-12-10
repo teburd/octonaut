@@ -36,6 +36,7 @@
 
 static void octo_server_accept(EV_P_ ev_io *watcher, int revents)
 {
+    printf("accept called\n");
     octo_server *server = ptr_offset(watcher, octo_server, read_watcher);
     struct sockaddr_storage addr;
     socklen_t len = sizeof(addr);
@@ -44,17 +45,11 @@ static void octo_server_accept(EV_P_ ev_io *watcher, int revents)
 
     if(connfd < 0)
     {
-        if(!server->error(server))
-        {
-            octo_server_destroy(server);
-        }
+        server->error(server);
     }
     else
     {
-        if(!server->connect(server, connfd, (struct sockaddr *)&addr, len))
-        {
-            octo_server_destroy(server);
-        }
+        server->connect(server, connfd, &addr, len);
     }
 }
 
