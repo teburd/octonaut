@@ -23,8 +23,9 @@
 
 #include <netinet/in.h>
 
-#include <octonaut/hash.h>
-#include <octonaut/aio.h>
+#include "list.h"
+#include "hash.h"
+
 #include "http_parser.h"
 
 typedef struct octo_http_request octo_http_request;
@@ -57,6 +58,7 @@ struct octo_http_request
     octo_hash header_hash;
 
     /* direct access to common header information */
+    char *url;
 
     /* http parser and its state */
     int parser_state;

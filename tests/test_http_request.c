@@ -1,4 +1,4 @@
-#include <octohttp/http_request.h>
+#include <octonaut/http_request.h>
 
 START_TEST (test_octo_http_request_init)
 {

@@ -46,7 +46,6 @@ def gdbtest(ctx):
 
 def build(bld):
     bld.recurse('octonaut')
-    bld.recurse('octohttp')
     bld.recurse('tests')
     bld.recurse('examples')
     bld.options.all_tests = True

@@ -157,10 +157,19 @@ static inline bool octo_hash_has(octo_hash *hashtable, void *key, size_t keylen)
 }
 
 /**
+ * set the hash entry key
+ */
+static inline void octo_hash_set_key(octo_hash_entry *entry, void *key, size_t keylen)
+{
+    entry->key = key;
+    entry->keylen = keylen;
+}
+
+/**
  * put an entry in to the hash table, duplicate keys are not put in, this is
  * not a multi hash!
  */
-static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
+static inline bool octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
     uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen, hashtable->hash_seed);
     octo_list *list = octo_hash_bin(hashtable, keyhash);
@@ -172,6 +181,21 @@ static inline void octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
     {
         octo_list_add(list, &entry->hash_list);
     }
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * put and set the hash entry key in to the hash table at the same time
+ */
+static inline bool octo_hash_add(octo_hash *hashtable, octo_hash_entry *entry,
+        void *key, size_t keylen)
+{
+    octo_hash_set_key(entry, key, keylen);
+    return octo_hash_put(hashtable, entry);
 }
 
 /**
