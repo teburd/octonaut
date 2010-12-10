@@ -21,7 +21,6 @@ typedef struct mock_server
 
 void mock_server_connect(octo_server *server, int fd, struct sockaddr_storage *addr, socklen_t len)
 {
-    printf("connect called\n");
     octo_logger_debug(server->logger, "connect called");
     mock_server *mserver = ptr_offset(server, mock_server, server);
     mserver->connects += 1;
@@ -30,7 +29,6 @@ void mock_server_connect(octo_server *server, int fd, struct sockaddr_storage *a
 
 void mock_server_error(octo_server *server)
 {
-    printf("error called\n");
     octo_logger_debug(server->logger, "error called");
     mock_server *mserver = ptr_offset(server, mock_server, server);
     mserver->connects += 1;

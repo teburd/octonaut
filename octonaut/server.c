@@ -36,18 +36,15 @@
 
 static void octo_server_accept(EV_P_ ev_io *watcher, int revents)
 {
-    printf("accept called\n");
     octo_server *server = ptr_offset(watcher, octo_server, read_watcher);
     struct sockaddr_storage addr;
     memset(&addr, 0, sizeof(addr));
     socklen_t len = sizeof(addr);
 
-    printf("accepting on socket fd %d\n", server->fd);
     int connfd = accept(server->fd, (struct sockaddr *)&addr, &len);
     
     if(connfd < 0)
     {
-        perror("accept");
         server->error(server);
     }
     else
