@@ -26,17 +26,12 @@
 #include <stdbool.h>
 #include <ev.h>
 
-typedef void (* octo_tcp_cb)(void *ctx, int fd, struct sockaddr addr, socklen_t addr_len);
+#include "server.h"
 
 typedef struct octo_tcp_server
 {
-    struct ev_loop *loop;
-    int fd;
-    int port;
-    int backlog;
-    ev_io accept_watcher;
-    void *connect_ctx;
-    octo_server_cb connect_cb;
+    octo_server server;
+    struct sockaddr_in sin;
 } octo_tcp_server;
 
 void octo_tcp_server_init(octo_tcp_server *server, struct ev_loop *loop,
