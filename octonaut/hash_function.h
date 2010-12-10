@@ -30,6 +30,12 @@ typedef uint32_t (*octo_hash_function)(const void *key, const size_t keylen, con
 uint32_t octo_hash_murmur3(const void *key, const size_t keylen, const uint32_t seed);
 uint32_t octo_hash_murmur3_x64(const void *key, const size_t keylen, const uint32_t seed);
 
+#if __amd64__
+#define     octo_default_hash_function octo_hash_murmur3_x64
+#else
+#define     octo_default_hash_function octo_hash_murmur3
+#endif
+
 #endif
 
 

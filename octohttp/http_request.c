@@ -24,6 +24,13 @@
 
 #include <octonaut/common.h>
 
+enum octo_http_parser_state
+{
+    init,
+    field,
+    value,
+    finish
+};
 
 /**
  * http_parser callbacks
@@ -107,7 +114,24 @@ parser_settings = {
     .on_message_complete    = request_message_complete
 };
 
-bool octo_http_request_parse(octo_http_request *reqest, const char *data, size_t len)
+void octo_http_request_init(octo_http_request *request)
 {
+    octo_list_init(&request->header_list);
+    octo_hash_init(&request->header_hash, octo_default_hash_function,
+            (uint32_t)rand(), 6);
+    http_parser_init(&request->parser, HTTP_REQUEST);
 }
+
+
+bool octo_http_request_parse(octo_http_request *request, const char *data, size_t len)
+{
+    http_parser_execute(&request->parser, &parser_settings, data, len);
+
+    if(request->parser_state == finish)
+    {
+        return true;
+    }
+    return false;
+}
+
 

@@ -1,4 +1,3 @@
-#include "server.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,6 +10,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include <octonaut/server.h>
 
 typedef struct mock_server
 {

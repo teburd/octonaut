@@ -14,6 +14,7 @@
 #include "test_logger.c"
 #include "test_aio.c"
 #include "test_server.c"
+#include "test_http_request.c"
 
 Suite* octonaut_suite(void)
 {
@@ -25,6 +26,7 @@ Suite* octonaut_suite(void)
     suite_add_tcase(s, octo_logger_tcase()); 
     suite_add_tcase(s, octo_aio_tcase()); 
     suite_add_tcase(s, octo_server_tcase()); 
+    suite_add_tcase(s, octo_http_request_tcase()); 
     return s;
 }
 

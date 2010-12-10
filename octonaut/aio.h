@@ -20,6 +20,9 @@
  * THE SOFTWARE.
  */
 
+#ifndef OCTO_AIO_H
+#define OCTO_AIO_H
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -68,3 +71,5 @@ void octo_aio_close(octo_aio *s);
  */
 ssize_t octo_aio_buffered_write(void *ctx, void *data, size_t len);
 ssize_t octo_aio_direct_write(void *ctx, void *data, size_t len);
+
+#endif

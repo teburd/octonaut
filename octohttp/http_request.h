@@ -45,21 +45,21 @@ typedef struct octo_http_header
 /**
  * enum used to track what the callbacks should do
  */
-typedef enum octo_http_request_state
-{
-    nothing,
-    field,
-    value
-} octo_http_request_state;
 
 /**
- * http request handler with buffered asynchronous IO
+ * http request struct that can be 
+ * feed incrementally with data.
  */
 struct octo_http_request
 {
-    octo_http_request_state state;
-    octo_list list_headers;
-    octo_hash hash_headers;
+    /* generic stores for headers */
+    octo_list header_list;
+    octo_hash header_hash;
+
+    /* direct access to common header information */
+
+    /* http parser and its state */
+    int parser_state;
     http_parser parser;
 };
 
