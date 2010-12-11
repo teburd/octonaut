@@ -24,7 +24,7 @@
 #define OCTO_POOL_H
 
 /**
- * reusable memory allocations
+ * reusable memory allocations in page size chunks for faster malloc/free
  */
 
 #endif

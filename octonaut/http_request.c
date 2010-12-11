@@ -27,10 +27,17 @@
 
 enum octo_http_parser_state
 {
-    init,
-    field,
-    value,
-    finish,
+    PARSER_INIT,
+    PARSER_MESSAGE_BEGIN,
+    PARSER_PATH,
+    PARSER_QUERY,
+    PARSER_URL,
+    PARSER_FRAGMENT,
+    PARSER_FIELD,
+    PARSER_VALUE,
+    PARSER_HEADERS_COMPLETE,
+    PARSER_BODY,
+    PARSER_MESSAGE_COMPLETE,
     error
 };
 
@@ -40,6 +47,7 @@ enum octo_http_parser_state
 static int request_message_begin(http_parser *parser)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_MESSAGE_BEGIN;
     printf("message begin\n");
     return 0;
 }
@@ -48,6 +56,7 @@ static int request_path(http_parser *parser,
     const char *path, const size_t len)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_PATH;
     printf("request path\n");
     return 0;
 }
@@ -56,6 +65,7 @@ static int request_query(http_parser *parser,
     const char *query, const size_t len)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_QUERY;
     printf("request query\n");
     return 0;
 }
@@ -64,6 +74,7 @@ static int request_url(http_parser *parser,
     const char *url, const size_t len)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_URL;
     printf("request url\n");
     return 0;
 }
@@ -72,6 +83,7 @@ static int request_fragment(http_parser *parser,
     const char *fragment, const size_t len)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_FRAGMENT;
     printf("request fragment\n");
     return 0;
 }
@@ -80,6 +92,7 @@ static int request_header_field(http_parser *parser,
     const char *field, const size_t len)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_FIELD;
     printf("request header field\n");
     return 0;
 }
@@ -88,6 +101,7 @@ static int request_header_value(http_parser *parser,
     const char *value, const size_t len)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_VALUE;
     printf("request header value\n");
     return 0;
 }
@@ -96,6 +110,7 @@ static int request_headers_complete(http_parser *parser)
 {
 
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_HEADERS_COMPLETE;
     printf("request headers complete\n");
     return 0;
 }
@@ -104,6 +119,7 @@ static int request_body(http_parser *parser,
     const char *body, const size_t len)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
+    request->parser_state = PARSER_BODY;
     printf("request body\n");
     return 0;
 }
@@ -112,7 +128,7 @@ static int request_message_complete(http_parser *parser)
 {
     printf("request message complete\n");
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
-    request->parser_state = finish;
+    request->parser_state = PARSER_MESSAGE_COMPLETE;
     return 0;
 }
 
@@ -132,16 +148,15 @@ parser_settings = {
 
 void octo_http_request_init(octo_http_request *request)
 {
-    octo_list_init(&request->header_list);
-    octo_hash_init(&request->header_hash, octo_default_hash_function,
-            (uint32_t)rand(), 6);
+    octo_list_init(&request->message_queue);
     http_parser_init(&request->parser, HTTP_REQUEST);
+    request->parser_state = PARSER_INIT;
 }
 
 void octo_http_request_destroy(octo_http_request *request)
 {
-    octo_list_destroy(&request->header_list);
-    octo_hash_destroy(&request->header_hash);
+    octo_list_destroy(&request->message_queue);
+    request->parser_state = PARSER_INIT;
 }
 
 size_t octo_http_request_parse(octo_http_request *request, const char *data, size_t len)

@@ -29,13 +29,9 @@
 #include "http_parser.h"
 
 /**
- * http request
- *
- * a http 1.1 request may contain several messages of varying sorts
- * so the request must be parsed in to individual messages to then be dealt
- * with
+ * http request handles parsing a stream in to a queue of http messages
  */
-struct octo_http_request
+typedef struct octo_http_request
 {
     /* http messages filled in as needed */
     octo_list message_queue;
@@ -43,8 +39,7 @@ struct octo_http_request
     /* http parser and its state */
     int parser_state;
     http_parser parser;
-};
-
+} octo_http_request;
 
 /**
  * obtain a pointer to an uninitialized http request
