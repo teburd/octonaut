@@ -25,4 +25,4 @@
 /**
  * macro that obtains a type * from a pointer to a member of type
  */
-#define ptr_offset(ptr, type, member) (type *) (((char *)ptr) - offsetof(type, member));
+#define ptr_offset(ptr, type, member) (type *) (((char *)ptr) - offsetof(type, member))

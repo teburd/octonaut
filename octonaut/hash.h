@@ -239,12 +239,9 @@ static inline octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, s
 }
 
 /**
- * The clever little macro that could. Obtains a pointer to the struct
- * that the octo_hash_entry is contained in. This is done by subtracting the offset
- * of the octo_hash_entry member from the address of the address of the octo_hash_entry
- * member.
+ * obtain a pointer to a struct containing a hash
  */
 #define octo_hash_entry(ptr, type, member) \
-    ((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
+    ptr_offset(ptr, type, member)
 
 #endif

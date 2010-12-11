@@ -23,6 +23,10 @@
 #ifndef OCTO_HTTP_HEADER_H
 #define OCTO_HTTP_HEADER_H
 
+#include "list.h"
+#include "buffer.h"
+#include "hash.h"
+
 /**
  * http key/value header pair
  */
@@ -37,7 +41,7 @@ typedef struct octo_http_header
 /**
  * obtain a pointer to an uninitialized http header
  */
-void octo_http_header_alloc(octo_http_header *header);
+octo_http_header * octo_http_header_alloc();
 
 /**
  * release a pointer to an uninitialized http header
@@ -53,15 +57,5 @@ void octo_http_header_init(octo_http_header *header);
  * destroy http header
  */
 void octo_http_header_destroy(octo_http_header *header);
-
-/**
- * append to the field of the header
- */
-void octo_http_header_field_append(octo_http_header *header, uint8_t *field, size_t len);
-
-/**
- * append to the value of the header
- */
-void octo_http_header_value_append(octo_http_header *header, uint8_t *field, size_t len);
 
 #endif

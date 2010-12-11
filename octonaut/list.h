@@ -27,21 +27,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/**
- * doubly linked intrusive list much like the linux kernel's linked list.
- *
- * The trick is using the typeof() macro to avoid passing in a bunch of
- * information about where in the struct the intrusive list is held.
- *
- * I avoid copying list.h from the kernel, but it does
- * not attempt to avoid taking most of the good ideas!
- */
-typedef struct octo_list octo_list;
+#include "common.h"
 
-struct octo_list {
-    octo_list *next;
-    octo_list *prev;
-};
+/**
+ * intrusive doubly linked list much like the linux kernel's linked list.
+ *
+ * The trick is using the typeof() and offsetof() macros to avoid passing
+ * around void * or having to do a bunch of type specific functions.
+ *
+ */
+
+/**
+ * doubly linked list
+ */
+typedef struct octo_list {
+    struct octo_list *next;
+    struct octo_list *prev;
+} octo_list;
 
 /**
  * initialize octo_list prev/next pointers
@@ -213,13 +215,10 @@ static inline size_t octo_list_size(const octo_list *list)
 
 
 /**
- * The clever little macro that could. Obtains a pointer to the struct
- * that the octo_list is contained in. This is done by subtracting the offset
- * of the octo_list member from the address of the address of the octo_list 
- * member.
+ * get a pointer to a struct containing a list
  */
 #define octo_list_entry(ptr, type, member) \
-    ((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
+    ptr_offset(ptr, type, member)
 
 /**
  * iterate over each item in the list, you can manipulate this current item
