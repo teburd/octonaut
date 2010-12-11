@@ -23,13 +23,17 @@
 #ifndef OCTO_HASH_H
 #define OCTO_HASH_H
 
-#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <memory.h>
 #include <assert.h>
 
-#include "list.h"
 #include "hash_function.h"
 
 #define min(x, y) ((x)<(y)?(x):(y))
+
+#define _octo_hash_alloc malloc
+#define _octo_hash_free  free
 
 /**
  * intrusive fixed size chained hash table store.
@@ -47,24 +51,37 @@
  *
  */
 
+typedef struct octo_hash_entry octo_hash_entry;
+
 typedef struct octo_hash
 {
     octo_hash_function hash_function;
     uint32_t hash_seed;
     uint32_t n_hash_bins;
-    octo_list *hash_bins;
+    size_t size;
+    octo_hash_entry **hash_bins;
 } octo_hash;
 
-typedef struct octo_hash_entry
+struct octo_hash_entry
 {
-    octo_list hash_list;
+    struct octo_hash_entry *next;
     size_t keylen;
     void *key;
-} octo_hash_entry;
+};
 
 static bool power_of_two(uint32_t x)
 {
     return (x!=0) && ((x&(x-1)) == 0);
+}
+
+/**
+ * initialize a hash entry
+ */
+static inline void octo_hash_entry_init(octo_hash_entry *entry, void *key, size_t keylen)
+{
+    entry->next = NULL;
+    entry->key = key;
+    entry->keylen = keylen;
 }
 
 /**
@@ -76,16 +93,15 @@ static inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_
     hashtable->hash_function = hash_function;
     hashtable->hash_seed = seed;
     hashtable->n_hash_bins = (1<<pow2size);
-    hashtable->hash_bins = malloc(sizeof(octo_list)*hashtable->n_hash_bins);
+    hashtable->hash_bins = malloc(sizeof(octo_hash_entry *)*hashtable->n_hash_bins);
 
     for(size_t i = 0; i < hashtable->n_hash_bins; ++i)
     {
-        octo_list_init(&hashtable->hash_bins[i]);
+        hashtable->hash_bins[i] = NULL;
     }
 
     assert(hashtable->n_hash_bins != 0);
     assert(power_of_two(hashtable->n_hash_bins));
-
 }
 
 /**
@@ -108,43 +124,30 @@ static inline uint32_t octo_hash_nbin(uint32_t bins, uint32_t keyhash)
     return (keyhash & (bins-1));
 }
 
-/**
- * obtain the hash bin given the hash and key
- */
-static inline octo_list * octo_hash_bin(octo_hash *hashtable, uint32_t keyhash)
-{
-    uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
-    assert(nbin < hashtable->n_hash_bins);
-    return &(hashtable->hash_bins[nbin]);
-}
-
 static inline size_t octo_hash_size(const octo_hash *hashtable)
 {
-    size_t size = 0;
-    for(uint32_t i = 0; i < hashtable->n_hash_bins; ++i)
-    {
-        size += octo_list_size(&hashtable->hash_bins[i]);
-    }
-    return size;
+    return hashtable->size;
 }
 
 /**
- * check if a bin has an entry
+ * find an entry in a bin
  */
-static inline bool octo_hash_bin_has(octo_hash *hashtable, uint32_t keyhash, void *key, size_t keylen)
+static inline octo_hash_entry * octo_hash_bin_get(octo_hash_entry *entry, void *key, size_t keylen)
 {
-    octo_list *list = octo_hash_bin(hashtable, keyhash);
-    octo_hash_entry *pos;
-    octo_hash_entry *next;
-    octo_list_foreach(pos, next, list, hash_list)
+    while(entry != NULL)
     {
-        if(strncmp((char*)key, (char*)pos->key, min(pos->keylen, keylen)) == 0)
+        if(keylen != entry->keylen)
         {
-            return true;
+            continue;
         }
+        
+        if(memcmp(entry->key, key, keylen) == 0)
+        {
+            return entry;
+        }
+        entry = entry->next;
     }
-
-    return false;
+    return NULL;
 }
 
 /**
@@ -153,7 +156,9 @@ static inline bool octo_hash_bin_has(octo_hash *hashtable, uint32_t keyhash, voi
 static inline bool octo_hash_has(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
-    return octo_hash_bin_has(hashtable, keyhash, key, keylen);
+    uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
+    octo_hash_entry *entry = hashtable->hash_bins[nbin];
+    return (bool)octo_hash_bin_get(entry, key, keylen);
 }
 
 /**
@@ -166,36 +171,31 @@ static inline void octo_hash_set_key(octo_hash_entry *entry, void *key, size_t k
 }
 
 /**
- * put an entry in to the hash table, duplicate keys are not put in, this is
- * not a multi hash!
+ * put an entry in to the hash table
  */
 static inline bool octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 {
     uint32_t keyhash = hashtable->hash_function(entry->key, entry->keylen, hashtable->hash_seed);
-    octo_list *list = octo_hash_bin(hashtable, keyhash);
-    if(octo_list_empty(list))
+    uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
+    octo_hash_entry *head = hashtable->hash_bins[nbin];
+
+    if(head == NULL)
     {
-        octo_list_add(list, &entry->hash_list);
+        hashtable->hash_bins[nbin] = entry;
+        return true;
     }
-    else if(!octo_hash_bin_has(hashtable, keyhash, entry->key, entry->keylen))
-    {
-        octo_list_add(list, &entry->hash_list);
-    }
-    else
+
+    octo_hash_entry *existing = octo_hash_bin_get(head, entry->key, entry->keylen);
+
+    if(existing)
     {
         return false;
     }
-    return true;
-}
 
-/**
- * put and set the hash entry key in to the hash table at the same time
- */
-static inline bool octo_hash_add(octo_hash *hashtable, octo_hash_entry *entry,
-        void *key, size_t keylen)
-{
-    octo_hash_set_key(entry, key, keylen);
-    return octo_hash_put(hashtable, entry);
+    hashtable->hash_bins[nbin] = entry;
+    entry->next = head;
+
+    return true;
 }
 
 /**
@@ -204,17 +204,10 @@ static inline bool octo_hash_add(octo_hash *hashtable, octo_hash_entry *entry,
 static inline octo_hash_entry * octo_hash_get(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
-    octo_list *list = octo_hash_bin(hashtable, keyhash);
-    octo_hash_entry *pos;
-    octo_hash_entry *next;
-    octo_list_foreach(pos, next, list, hash_list)
-    {
-        if(strncmp((char*)key, (char*)pos->key, min(pos->keylen, keylen)) == 0)
-        {
-            return pos;
-        }
-    }
-    return NULL;
+    uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
+    octo_hash_entry *entry = hashtable->hash_bins[nbin]; 
+
+    return octo_hash_bin_get(entry, key, keylen);
 }
 
 /**
@@ -223,16 +216,34 @@ static inline octo_hash_entry * octo_hash_get(octo_hash *hashtable, void *key, s
 static inline octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, size_t keylen)
 {
     uint32_t keyhash = hashtable->hash_function(key, keylen, hashtable->hash_seed);
-    octo_list *list = octo_hash_bin(hashtable, keyhash);
-    octo_hash_entry *pos;
-    octo_hash_entry *next;
-    octo_list_foreach(pos, next, list, hash_list)
+    uint32_t nbin = octo_hash_nbin(hashtable->n_hash_bins, keyhash);
+    octo_hash_entry *cur = hashtable->hash_bins[nbin];
+    octo_hash_entry *prev = NULL;
+
+    while(cur != NULL)
     {
-        if(strncmp((char*)key, (char*)pos->key, min(pos->keylen, keylen)) == 0)
+        if(keylen != cur->keylen)
         {
-            octo_list_remove(&pos->hash_list);
-            return pos;
+            continue;
         }
+        
+        if(memcmp(cur->key, key, keylen) == 0)
+        {
+            if(prev)
+            {
+                prev->next = cur->next;
+            }
+            else
+            {
+                hashtable->hash_bins[nbin] = cur->next;
+            }
+
+            cur->next = NULL;
+
+            return cur;
+        }
+        prev = cur;
+        cur = cur->next;
     }
 
     return NULL;
