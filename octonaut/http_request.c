@@ -30,7 +30,8 @@ enum octo_http_parser_state
     init,
     field,
     value,
-    finish
+    finish,
+    error
 };
 
 /**
@@ -143,12 +144,17 @@ void octo_http_request_destroy(octo_http_request *request)
     octo_hash_destroy(&request->header_hash);
 }
 
-
-bool octo_http_request_parse(octo_http_request *request, const char *data, size_t len)
+size_t octo_http_request_parse(octo_http_request *request, const char *data, size_t len)
 {
     size_t parsed = http_parser_execute(&request->parser, &parser_settings, data, len);
-
     return parsed;
 }
 
-
+bool octo_http_request_valid(octo_http_request *request)
+{
+    if(request->parser_state != error)
+    {
+        return true;
+    }
+    return false;
+}

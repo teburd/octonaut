@@ -26,7 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_CHUNK_SIZE 4096
+/* chunk size should be relatively large compared to two pointers */
+#define DEFAULT_CHUNK_SIZE 256
 
 #define min(x, y) ((x)<(y)?(x):(y))
 #define max(x, y) ((x)<(y)?(x):(y))
@@ -45,11 +46,11 @@
  *
  * notably the requested size may be different than the returned size.
  */
-static inline octo_buffer_item * octo_buffer_item_alloc(size_t len)
+static inline octo_buffer_chunk * octo_buffer_chunk_alloc(size_t len)
 {
-    octo_buffer_item *item;
+    octo_buffer_chunk *item;
 
-    item = malloc(sizeof(octo_buffer_item) + len);
+    item = malloc(sizeof(octo_buffer_chunk) + len);
 
     if(item == NULL)
     {
@@ -69,7 +70,7 @@ static inline octo_buffer_item * octo_buffer_item_alloc(size_t len)
  * to a list containing a free buffer pool (stack buffer pool)
  * or actually calling free()
  */
-static inline void octo_buffer_item_free(octo_buffer_item *item)
+static inline void octo_buffer_chunk_free(octo_buffer_chunk *item)
 {
     octo_list_remove(&item->list);
     free(item);
@@ -78,7 +79,7 @@ static inline void octo_buffer_item_free(octo_buffer_item *item)
 /**
  * item bytes used
  */
-static inline size_t octo_buffer_item_size(octo_buffer_item *item)
+static inline size_t octo_buffer_chunk_size(octo_buffer_chunk *item)
 {
     return item->size;
 }
@@ -86,7 +87,7 @@ static inline size_t octo_buffer_item_size(octo_buffer_item *item)
 /**
  * item bytes capacity
  */
-static inline size_t octo_buffer_item_capacity(octo_buffer_item *item)
+static inline size_t octo_buffer_chunk_capacity(octo_buffer_chunk *item)
 {
     return item->capacity;
 }
@@ -94,7 +95,7 @@ static inline size_t octo_buffer_item_capacity(octo_buffer_item *item)
 /**
  * item bytes remaining to write to
  */
-static inline size_t octo_buffer_item_remaining(octo_buffer_item *item)
+static inline size_t octo_buffer_chunk_remaining(octo_buffer_chunk *item)
 {
     return item->capacity - (item->size + item->start);
 }
@@ -115,12 +116,12 @@ void octo_buffer_init(octo_buffer *b, size_t chunk_size)
 
 void octo_buffer_destroy(octo_buffer *b)
 {
-    octo_buffer_item *pos;
-    octo_buffer_item *next;
+    octo_buffer_chunk *pos;
+    octo_buffer_chunk *next;
 
     octo_list_foreach(pos, next, &b->buffer_list, list)
     {
-        octo_buffer_item_free(pos);
+        octo_buffer_chunk_free(pos);
     }
 
     octo_list_destroy(&b->buffer_list);
@@ -137,16 +138,16 @@ size_t octo_buffer_write(octo_buffer *b, void *rawdata, size_t len)
     uint8_t *data = (uint8_t *)rawdata;
     size_t copylen = 0;
     size_t copied = 0;
-    octo_buffer_item *item = NULL;
+    octo_buffer_chunk *item = NULL;
     octo_list *head = octo_list_head(&b->buffer_list);
 
     if(head != &b->buffer_list)
     {
-        item = octo_list_entry(head, octo_buffer_item, list);
+        item = octo_list_entry(head, octo_buffer_chunk, list);
     }
     else
     {
-        item = octo_buffer_item_alloc(b->chunk_size);
+        item = octo_buffer_chunk_alloc(b->chunk_size);
         if(item == NULL)
         {
             return copied;
@@ -156,7 +157,7 @@ size_t octo_buffer_write(octo_buffer *b, void *rawdata, size_t len)
 
     while(copied < len)
     {
-        copylen = min(len-copied, octo_buffer_item_remaining(item));
+        copylen = min(len-copied, octo_buffer_chunk_remaining(item));
 
         if(copylen > 0)
         {
@@ -167,7 +168,7 @@ size_t octo_buffer_write(octo_buffer *b, void *rawdata, size_t len)
 
         if(copied < len)
         {
-            item = octo_buffer_item_alloc(b->chunk_size);
+            item = octo_buffer_chunk_alloc(b->chunk_size);
             if(item == NULL)
             {
                 return copied;
@@ -195,17 +196,17 @@ size_t octo_buffer_read(octo_buffer *b, void *rawdata, size_t len)
             break;
         }
 
-        octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
-        copylen = min(len-copied, octo_buffer_item_size(item));
+        octo_buffer_chunk *item = octo_list_entry(tail, octo_buffer_chunk, list);
+        copylen = min(len-copied, octo_buffer_chunk_size(item));
         memcpy(&data[copied], &item->data[item->start], copylen);
         copied += copylen;
 
         item->start += copylen;
         item->size -= copylen;
 
-        if(octo_buffer_item_size(item) == 0)
+        if(octo_buffer_chunk_size(item) == 0)
         {
-            octo_buffer_item_free(item);
+            octo_buffer_chunk_free(item);
         }
     }
 
@@ -220,7 +221,7 @@ size_t octo_buffer_peek(octo_buffer *b, void *rawdata, size_t len)
     size_t copylen = 0;
 
     octo_list *tail = octo_list_tail(&b->buffer_list);
-    octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
+    octo_buffer_chunk *item = octo_list_entry(tail, octo_buffer_chunk, list);
 
     if(tail == &b->buffer_list)
     {
@@ -229,16 +230,16 @@ size_t octo_buffer_peek(octo_buffer *b, void *rawdata, size_t len)
 
     while(copied < len)
     {
-        copylen = min(len-copied, octo_buffer_item_size(item));
+        copylen = min(len-copied, octo_buffer_chunk_size(item));
         memcpy(&data[copied], &item->data[item->start], copylen);
         copied += copylen;
 
-        if(copied >= octo_buffer_item_size(item))
+        if(copied >= octo_buffer_chunk_size(item))
         {
             tail = tail->prev;
             if(tail != &b->buffer_list)
             {
-                item = octo_list_entry(tail, octo_buffer_item, list);
+                item = octo_list_entry(tail, octo_buffer_chunk, list);
             }
             else
             {
@@ -265,16 +266,16 @@ size_t octo_buffer_drain(octo_buffer *b, size_t len)
             break;
         }
 
-        octo_buffer_item *item = octo_list_entry(tail, octo_buffer_item, list);
-        drainlen = min(len-drained, octo_buffer_item_size(item));
+        octo_buffer_chunk *item = octo_list_entry(tail, octo_buffer_chunk, list);
+        drainlen = min(len-drained, octo_buffer_chunk_size(item));
         drained += drainlen;
 
         item->start += drainlen;
         item->size -= drainlen;
 
-        if(octo_buffer_item_size(item) == 0)
+        if(octo_buffer_chunk_size(item) == 0)
         {
-            octo_buffer_item_free(item);
+            octo_buffer_chunk_free(item);
         }
     }
 

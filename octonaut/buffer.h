@@ -29,16 +29,16 @@
 #include "list.h"
 
 /**
- * buffer
+ * fast read/write buffer for network IO
  */
-typedef struct octo_buffer_item
+typedef struct octo_buffer_chunk
 {
     octo_list list;
     size_t start;
     size_t size;
     size_t capacity;
     uint8_t data[];
-} octo_buffer_item;
+} octo_buffer_chunk;
 
 typedef struct octo_buffer
 {
@@ -71,7 +71,7 @@ size_t octo_buffer_size(const octo_buffer *b);
 /**
  * number of elements in the buffer
  */
-size_t octo_buffer_items(const octo_buffer *b);
+size_t octo_buffer_chunks(const octo_buffer *b);
 
 /**
  * write to the buffer from a memory location at most len bytes

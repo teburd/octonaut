@@ -34,8 +34,9 @@
  * octo_aio 
  *
  * Provides intelligently buffered asynchronous non-blocking IO on a file
- * descriptor. Buffers on write only when needed otherwise simply writes
- * directly to the socket.
+ * descriptor. Buffers on write only when needed (EAGAIN) otherwise simply
+ * writes directly to the socket. Avoids constant branch checking by using
+ * function pointers (how clever of me).
  */
 typedef struct octo_aio octo_aio;
 typedef ssize_t (*octo_aio_write_cb) (void *ctx, void *data, size_t len);
@@ -64,9 +65,8 @@ void octo_aio_stop(octo_aio *s);
 ssize_t octo_aio_write(octo_aio *s, void *data, size_t len);
 void octo_aio_close(octo_aio *s);
 
-
 /**
- * buffered and direct write callbacks, the defaults but can be
+ * buffered and direct write functions, the defaults but can be
  * changed as desired!
  */
 ssize_t octo_aio_buffered_write(void *ctx, void *data, size_t len);

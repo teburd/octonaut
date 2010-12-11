@@ -20,13 +20,32 @@
  * THE SOFTWARE.
  */
 
-#ifndef OCTO_POOL_H
-#define OCTO_POOL_H
+#ifndef OCTO_HTTP_MESSAGE_H
+#define OCTO_HTTP_MESSAGE_H
+
+#include "http_parser.h"
+
+typedef enum http_method octo_http_method;
 
 /**
- * reusable memory allocations
+ * http message 
+ *
+ * method, url, version, set of key/value headers, and message body
  */
+typedef struct octo_http_message
+{
+    octo_list message_queue;
+
+    /* common http message parameters */
+    octo_http_method method; 
+    octo_buffer url;
+    int http_major_version;
+    int http_minor_version;
+    octo_hash headers;
+    octo_buffer body;
+
+} octo_http_message;
+
 
 #endif
-
 

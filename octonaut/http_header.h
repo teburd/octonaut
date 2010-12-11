@@ -20,13 +20,48 @@
  * THE SOFTWARE.
  */
 
-#ifndef OCTO_POOL_H
-#define OCTO_POOL_H
+#ifndef OCTO_HTTP_HEADER_H
+#define OCTO_HTTP_HEADER_H
 
 /**
- * reusable memory allocations
+ * http key/value header pair
  */
+typedef struct octo_http_header
+{
+    octo_hash_entry header_hash;
+    octo_list header_list;
+    octo_buffer field;
+    octo_buffer value;
+} octo_http_header;
+
+/**
+ * obtain a pointer to an uninitialized http header
+ */
+void octo_http_header_alloc(octo_http_header *header);
+
+/**
+ * release a pointer to an uninitialized http header
+ */
+void octo_http_header_free(octo_http_header *header);
+
+/**
+ * initialize http header
+ */
+void octo_http_header_init(octo_http_header *header);
+
+/**
+ * destroy http header
+ */
+void octo_http_header_destroy(octo_http_header *header);
+
+/**
+ * append to the field of the header
+ */
+void octo_http_header_field_append(octo_http_header *header, uint8_t *field, size_t len);
+
+/**
+ * append to the value of the header
+ */
+void octo_http_header_value_append(octo_http_header *header, uint8_t *field, size_t len);
 
 #endif
-
-

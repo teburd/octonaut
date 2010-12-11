@@ -28,44 +28,58 @@
 
 #include "http_parser.h"
 
-typedef struct octo_http_request octo_http_request;
-
 /**
- * http key/value header pair
- */
-typedef struct octo_http_header
-{
-    octo_hash_entry header_hash;
-    octo_list header_list;
-    char *field;
-    size_t field_len;
-    char *value;
-    size_t value_len;
-} octo_http_header;
-
-/**
- * enum used to track what the callbacks should do
- */
-
-/**
- * http request struct that can be 
- * feed incrementally with data.
+ * http request
+ *
+ * a http 1.1 request may contain several messages of varying sorts
+ * so the request must be parsed in to individual messages to then be dealt
+ * with
  */
 struct octo_http_request
 {
-    /* generic stores for headers */
-    octo_list header_list;
-    octo_hash header_hash;
-
-    /* direct access to common header information */
-    char *url;
+    /* http messages filled in as needed */
+    octo_list message_queue;
 
     /* http parser and its state */
     int parser_state;
     http_parser parser;
 };
 
+
+/**
+ * obtain a pointer to an uninitialized http request
+ */
+octo_http_request * octo_http_request_alloc(octo_http_request *request);
+
+/**
+ * release a pointer to a destroyed http request
+ */
+void octo_http_request_free(octo_http_request *request);
+
+/**
+ * initialize a http request
+ */
 void octo_http_request_init(octo_http_request *request);
+
+/**
+ * destroy a http request
+ */
 void octo_http_request_destroy(octo_http_request *request);
-bool octo_http_request_parse(octo_http_request *request, const char *data, size_t len);
+
+/**
+ * create and initialize a http request
+ */
+octo_http_request * octo_http_request_new(octo_http_request *request);
+
+/**
+ * destroy and free a http request
+ */
+void octo_http_request_delete(octo_http_request *request);
+
+/**
+ * parse an incoming stream in to http_messages
+ *
+ * returns the number of new messages parsed
+ */
+size_t octo_http_request_parse(octo_http_request *request, const char *data, size_t len);
 
