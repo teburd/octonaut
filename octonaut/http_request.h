@@ -69,7 +69,7 @@ void octo_http_request_destroy(octo_http_request *request);
 /**
  * create and initialize a http request
  */
-octo_http_request * octo_http_request_new(octo_http_request *request);
+octo_http_request * octo_http_request_new();
 
 /**
  * destroy and free a http request

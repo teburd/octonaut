@@ -32,13 +32,13 @@ typedef enum http_method octo_http_method;
  *
  * method, url, version, set of key/value headers, and message body
  */
-typedef struct octo_http_message
+typedef struct octo_http_message octo_http_message;
 {
     octo_list message_queue;
 
-    /* common http message parameters */
     octo_http_method method; 
-    octo_buffer url;
+    octo_buffer path;
+    octo_buffer query;
     int http_major_version;
     int http_minor_version;
     octo_hash headers;
@@ -46,6 +46,48 @@ typedef struct octo_http_message
 
 } octo_http_message;
 
+/**
+ * initialize a http message
+ */
+void octo_http_message_init(octo_http_message *message);
+
+/**
+ * destroy a http message
+ */
+void octo_http_message_destroy(octo_http_message *message);
+
+/**
+ * allocate an uninitialized http message
+ */
+octo_http_message * octo_http_message_alloc();
+
+/**
+ * free a destroyed http message
+ */
+void octo_http_message_free(octo_http_message *message);
+
+/**
+ * allocate and initialize a http message 
+ */
+octo_http_message * octo_http_message_new();
+
+/**
+ * destroy and free a http message
+ */
+void octo_http_message_delete(octo_http_message *message);
+
+/**
+ * append a header to an http message
+ */
+void octo_http_message_append_header(octo_http_message *message,
+        octo_http_header *header);
+
+/**
+ * pointer to the last header
+ *
+ * returns null if there are no headers
+ */
+octo_http_header * octo_http_message_last_header(octo_http_message *message);
 
 #endif
 
