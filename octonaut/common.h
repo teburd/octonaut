@@ -20,9 +20,34 @@
  * THE SOFTWARE.
  */
 
+#ifndef OCTO_COMMON_H
+#define OCTO_COMMON_H
+
+#include <stdbool.h>
+#include <stdint.h>
 #include <stddef.h>
 
 /**
  * macro that obtains a type * from a pointer to a member of type
  */
 #define ptr_offset(ptr, type, member) (type *) (((char *)ptr) - offsetof(type, member))
+
+/**
+ * min macro
+ */
+#define min(x, y) ((x)<(y)?(x):(y))
+
+/**
+ * max macro
+ */
+#define max(x, y) ((x)>(y)?(x):(y))
+
+/**
+ * returns true if x is a power of 2
+ */
+static inline bool power_of_two(uint32_t x)
+{
+    return (x!=0) && ((x&(x-1)) == 0);
+}
+
+#endif

@@ -20,17 +20,15 @@
  * THE SOFTWARE.
  */
 
-#include "buffer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "buffer.h"
+
 /* chunk size should be relatively large compared to two pointers */
 #define DEFAULT_CHUNK_SIZE 256
-
-#define min(x, y) ((x)<(y)?(x):(y))
-#define max(x, y) ((x)<(y)?(x):(y))
 
 /**
  * alloc a buffer item from somewhere.

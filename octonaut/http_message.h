@@ -81,9 +81,9 @@ octo_http_message * octo_http_message_new();
 void octo_http_message_delete(octo_http_message *message);
 
 /**
- * append a header to an http message
+ * add a header to an http message
  */
-void octo_http_message_append_header(octo_http_message *message,
+void octo_http_message_add_header(octo_http_message *message,
         octo_http_header *header);
 
 /**
