@@ -20,52 +20,40 @@
  * THE SOFTWARE.
  */
 
-#ifndef OCTO_HTTP_HEADER_H
-#define OCTO_HTTP_HEADER_H
+#include "http_message.h"
 
-#include "list.h"
-#include "buffer.h"
-#include "hash.h"
-
-/**
- * http key/value header pair
- */
-typedef struct octo_http_header
+void octo_http_message_init(octo_http_message *message)
 {
-    octo_hash_entry header_hash;
-    octo_list header_list;
-    octo_buffer field;
-    octo_buffer value;
-} octo_http_header;
+    octo_list_init(&message->message_queue);
+    message->method = -1;
 
-/**
- * allocate an uninitialized http header
- */
-octo_http_header * octo_http_header_alloc();
+    octo_buffer_init(&message->path, 256);
+    octo_buffer_init(&message->query, 256);
+    message->http_major_version = 0;
+    message->http_minor_version = 0;
+    octo_hash_init(&message->headers, octo_default_hash_function, rand(), 64);
+    octo_buffer_init(&message->body, 1024);
+}
 
-/**
- * free a destroyed http header
- */
-void octo_http_header_free(octo_http_header *header);
+void octo_http_message_destroy(octo_http_message *message)
+{
+    octo_list_destroy(&message->message_queue);
+    message->method = -1;
 
-/**
- * initialize a http header
- */
-void octo_http_header_init(octo_http_header *header);
+    octo_buffer_destroy(&message->path);
+    octo_buffer_destroy(&message->query);
+    message->http_major_version = 0;
+    message->http_minor_version = 0;
 
-/**
- * destroy a http header
- */
-void octo_http_header_destroy(octo_http_header *header);
+    /*
+    octo_hash_iterator iter;
+    octo_http_header *header = octo_hash_iterator_init(&message->headers, &iter);
+    do {
+        octo_http_header_free(header);
+    } while(header = octo_hash_iterator_next(iter, octo_http_header, header_hash))
+    */
 
-/**
- * allocate and initialize a http header
- */
-octo_http_header * octo_http_header_new();
+    octo_hash_destroy(&message->headers);
 
-/**
- * destroy and free a http header
- */
-void octo_http_header_delete(octo_http_header * header);
-
-#endif
+    octo_buffer_destroy(&message->body);
+}

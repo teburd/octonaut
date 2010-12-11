@@ -20,52 +20,43 @@
  * THE SOFTWARE.
  */
 
-#ifndef OCTO_HTTP_HEADER_H
-#define OCTO_HTTP_HEADER_H
+#include "http_header.h"
 
-#include "list.h"
-#include "buffer.h"
-#include "hash.h"
-
-/**
- * http key/value header pair
- */
-typedef struct octo_http_header
+octo_http_header * octo_http_header_alloc()
 {
-    octo_hash_entry header_hash;
-    octo_list header_list;
-    octo_buffer field;
-    octo_buffer value;
-} octo_http_header;
+    return malloc(sizeof(octo_http_header));
+}
 
-/**
- * allocate an uninitialized http header
- */
-octo_http_header * octo_http_header_alloc();
+void octo_http_header_free(octo_http_header *header)
+{
+    free(header);
+}
 
-/**
- * free a destroyed http header
- */
-void octo_http_header_free(octo_http_header *header);
+void octo_http_header_init(octo_http_header *header)
+{
+    octo_list_init(&header->header_list);
+    octo_buffer_init(&header->field, 256);
+    octo_buffer_init(&header->value, 256);
+}
 
-/**
- * initialize a http header
- */
-void octo_http_header_init(octo_http_header *header);
+void octo_http_header_destroy(octo_http_header *header)
+{
+    octo_list_destroy(&header->header_list);
+    octo_buffer_destroy(&header->field);
+    octo_buffer_destroy(&header->value);
+}
 
-/**
- * destroy a http header
- */
-void octo_http_header_destroy(octo_http_header *header);
+octo_http_header * octo_http_header_new()
+{
+    octo_http_header * header = octo_http_header_alloc();
+    octo_http_header_init(header);
+    return header;
+}
 
-/**
- * allocate and initialize a http header
- */
-octo_http_header * octo_http_header_new();
+void octo_http_header_delete(octo_http_header * header)
+{
+    octo_http_header_destroy(header);
+    octo_http_header_free(header);
+}
 
-/**
- * destroy and free a http header
- */
-void octo_http_header_delete(octo_http_header * header);
 
-#endif

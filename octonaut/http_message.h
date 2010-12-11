@@ -23,6 +23,10 @@
 #ifndef OCTO_HTTP_MESSAGE_H
 #define OCTO_HTTP_MESSAGE_H
 
+#include "list.h"
+#include "buffer.h"
+#include "hash.h"
+#include "http_header.h"
 #include "http_parser.h"
 
 typedef enum http_method octo_http_method;
@@ -32,7 +36,7 @@ typedef enum http_method octo_http_method;
  *
  * method, url, version, set of key/value headers, and message body
  */
-typedef struct octo_http_message octo_http_message;
+typedef struct octo_http_message
 {
     octo_list message_queue;
 
