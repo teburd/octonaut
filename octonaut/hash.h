@@ -75,6 +75,11 @@ void octo_hash_entry_init(octo_hash_entry *entry, void *key,
         size_t keylen);
 
 /**
+ * initialize a hash entry using C99 struct initialization
+ */
+#define octo_hash_entry_sinit(key, keylen) { .next = NULL, .key = key, .keylen = keylen }
+
+/**
  * initialize a hash table
  */
 void octo_hash_init(octo_hash *hashtable,
