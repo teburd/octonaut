@@ -141,7 +141,7 @@ size_t octo_buffer_write(octo_buffer *b, void *rawdata, size_t len)
 
     if(head != &b->buffer_list)
     {
-        item = octo_list_entry(head, octo_buffer_chunk, list);
+        item = ptr_offset(head, octo_buffer_chunk, list);
     }
     else
     {
@@ -194,7 +194,7 @@ size_t octo_buffer_read(octo_buffer *b, void *rawdata, size_t len)
             break;
         }
 
-        octo_buffer_chunk *item = octo_list_entry(tail, octo_buffer_chunk, list);
+        octo_buffer_chunk *item = ptr_offset(tail, octo_buffer_chunk, list);
         copylen = min(len-copied, octo_buffer_chunk_size(item));
         memcpy(&data[copied], &item->data[item->start], copylen);
         copied += copylen;
@@ -219,7 +219,7 @@ size_t octo_buffer_peek(octo_buffer *b, void *rawdata, size_t len)
     size_t copylen = 0;
 
     octo_list *tail = octo_list_tail(&b->buffer_list);
-    octo_buffer_chunk *item = octo_list_entry(tail, octo_buffer_chunk, list);
+    octo_buffer_chunk *item = ptr_offset(tail, octo_buffer_chunk, list);
 
     if(tail == &b->buffer_list)
     {
@@ -237,7 +237,7 @@ size_t octo_buffer_peek(octo_buffer *b, void *rawdata, size_t len)
             tail = tail->prev;
             if(tail != &b->buffer_list)
             {
-                item = octo_list_entry(tail, octo_buffer_chunk, list);
+                item = ptr_offset(tail, octo_buffer_chunk, list);
             }
             else
             {
@@ -264,7 +264,7 @@ size_t octo_buffer_drain(octo_buffer *b, size_t len)
             break;
         }
 
-        octo_buffer_chunk *item = octo_list_entry(tail, octo_buffer_chunk, list);
+        octo_buffer_chunk *item = ptr_offset(tail, octo_buffer_chunk, list);
         drainlen = min(len-drained, octo_buffer_chunk_size(item));
         drained += drainlen;
 
