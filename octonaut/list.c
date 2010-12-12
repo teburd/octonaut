@@ -49,7 +49,7 @@ inline void octo_list_destroy(octo_list *l)
 /**
  * insert a new octo_list * in between the prev and next octo_list *
  */
-inline void _octo_list_insert(octo_list *new, octo_list *prev,
+static inline void _octo_list_insert(octo_list *new, octo_list *prev,
     octo_list *next)
 {
 	next->prev = new;
