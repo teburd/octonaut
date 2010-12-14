@@ -112,6 +112,7 @@ inline bool octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
 
     if(head == NULL)
     {
+        hashtable->size += 1;
         hashtable->hash_bins[nbin] = entry;
         return true;
     }
@@ -126,6 +127,7 @@ inline bool octo_hash_put(octo_hash *hashtable, octo_hash_entry *entry)
     hashtable->hash_bins[nbin] = entry;
     entry->next = head;
 
+    hashtable->size += 1;
     return true;
 }
 
@@ -164,7 +166,7 @@ inline octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, size_t k
             }
 
             cur->next = NULL;
-
+            hashtable->size -= 1;
             return cur;
         }
         prev = cur;
