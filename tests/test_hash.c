@@ -110,9 +110,85 @@ START_TEST (test_octo_hash_chaining)
     fail_unless(entry == NULL,
         "hash table failed to retrieve correct entry");
 
+    key = 1;
+    entry = octo_hash_pop(&hash, &key, sizeof(key));
+
+    fail_unless(entry == &(s1.hash),
+        "hash table failed to retrieve correct entry");
+
+    fail_unless(octo_hash_size(&hash) == 0,
+        "hash table size is incorrect");
+
     octo_hash_destroy(&hash);
 }
 END_TEST
+
+typedef struct test_hash_sstring
+{
+    char key[10];
+    octo_hash_entry hash;
+} test_hash_sstring;
+
+START_TEST (test_octo_hash_strings)
+{
+    octo_hash hash;
+
+    test_hash_sstring s1 = 
+        {
+            .key = "Queen",
+        };
+    octo_hash_entry_init(&s1.hash, s1.key, strlen(s1.key));
+
+    test_hash_sstring s2 = 
+        {
+            .key = "King",
+        };
+    octo_hash_entry_init(&s2.hash, s2.key, strlen(s2.key));
+
+    octo_hash_init(&hash, octo_default_hash_function, 0, 1);
+
+    octo_hash_put(&hash, &s1.hash);
+    octo_hash_put(&hash, &s2.hash);
+    
+    char king[] = "King";
+    char queen[] = "Queen";
+    char jack[] = "Jack";
+
+    octo_hash_entry *entry = octo_hash_get(&hash, queen, strlen(queen)); 
+
+    fail_unless(entry == &(s1.hash),
+        "hash table failed to retrieve correct entry");
+
+    entry = octo_hash_get(&hash, &king, strlen(king));
+
+    fail_unless(entry == &(s2.hash),
+        "hash table failed to retrieve correct entry");
+
+    entry = octo_hash_pop(&hash, king, strlen(king));
+
+    fail_unless(entry == &(s2.hash),
+        "hash table failed to retrieve correct entry");
+
+    fail_unless(octo_hash_size(&hash) == 1,
+        "hash table size is incorrect");
+
+    entry = octo_hash_get(&hash, jack, strlen(jack));
+
+    fail_unless(entry == NULL,
+        "hash table failed to retrieve correct entry");
+
+    entry = octo_hash_pop(&hash, queen, strlen(queen));
+
+    fail_unless(entry == &(s1.hash),
+        "hash table failed to retrieve correct entry");
+
+    fail_unless(octo_hash_size(&hash) == 0,
+        "hash table size is incorrect");
+
+    octo_hash_destroy(&hash);
+}
+END_TEST
+
 
 
 TCase* octo_hash_tcase()
@@ -121,6 +197,7 @@ TCase* octo_hash_tcase()
     tcase_add_test(tc_octo_hash, test_octo_hash_create);
     tcase_add_test(tc_octo_hash, test_octo_hash_put_get_remove);
     tcase_add_test(tc_octo_hash, test_octo_hash_chaining);
+    tcase_add_test(tc_octo_hash, test_octo_hash_strings);
     /*
     tcase_add_test(tc_octo_hash, test_octo_hash_prepend);
     tcase_add_test(tc_octo_hash, test_octo_hash_append);

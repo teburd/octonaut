@@ -45,6 +45,7 @@ static inline octo_hash_entry * octo_hash_bin_get(octo_hash_entry *entry, void *
     {
         if(keylen != entry->keylen)
         {
+            entry = entry->next;
             continue;
         }
         
@@ -80,6 +81,7 @@ inline void octo_hash_init(octo_hash *hashtable, octo_hash_function hash_functio
 
     assert(hashtable->n_hash_bins != 0);
     assert(power_of_two(hashtable->n_hash_bins));
+    hashtable->size = 0;
 }
 
 inline void octo_hash_destroy(octo_hash *hashtable)
@@ -89,6 +91,7 @@ inline void octo_hash_destroy(octo_hash *hashtable)
     hashtable->n_hash_bins = 0;
     free(hashtable->hash_bins);
     hashtable->hash_bins = NULL;
+    hashtable->size = 0;
 }
 
 inline size_t octo_hash_size(const octo_hash *hashtable)
@@ -151,6 +154,8 @@ inline octo_hash_entry * octo_hash_pop(octo_hash *hashtable, void *key, size_t k
     {
         if(keylen != cur->keylen)
         {
+            prev = cur;
+            cur = cur->next;
             continue;
         }
         
