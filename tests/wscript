@@ -3,6 +3,6 @@
 def build(bld):
     bld(
         features='c cprogram',
-        source = 'octonaut_tests.c',
+        source = bld.path.ant_glob('*.c'),
         target = 'octonaut_tests',
-        use = ['check', 'ev', 'gcov', 'octonaut', 'octohttp'])
+        use = ['check', 'ev', 'octonaut'])

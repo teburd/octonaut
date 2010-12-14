@@ -1,20 +1,20 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <ev.h>
 #include <check.h>
 
-#include "common.h"
+#include "aio.h"
+#include "list.h"
+#include "buffer.h"
+#include "hash_function.h"
+#include "hash.h"
+#include "logger.h"
+#include "server.h"
+#include "http_header.h"
 
-#include "test_list.c"
-#include "test_buffer.c"
-#include "test_hash_function.c"
-#include "test_hash.c"
-#include "test_logger.c"
-#include "test_aio.c"
-#include "test_server.c"
-#include "test_http_request.c"
+/*
+#include "http_message.h"
+#include "http_request.h"
+#include "http_server.h"
+*/
+
 
 Suite* octonaut_suite(void)
 {
