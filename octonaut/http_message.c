@@ -31,7 +31,7 @@ void octo_http_message_init(octo_http_message *message)
     octo_buffer_init(&message->query, 256);
     message->http_major_version = 0;
     message->http_minor_version = 0;
-    octo_hash_init(&message->headers, octo_default_hash_function, rand(), 64);
+    octo_hash_init(&message->headers, octo_default_hash_function, rand(), 6);
     octo_buffer_init(&message->body, 1024);
 }
 
