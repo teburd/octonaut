@@ -104,4 +104,15 @@ size_t octo_buffer_peek(octo_buffer *b, void *data, size_t len);
  */
 size_t octo_buffer_drain(octo_buffer *b, size_t len);
 
+/**
+ * compare two buffers for equivalence, acts like strcmp
+ */
+int octo_buffer_cmp(octo_buffer *b1, octo_buffer *b2);
+
+/**
+ * hash of a buffer
+ */
+uint32_t octo_buffer_hash(octo_buffer *b);
+
+
 #endif
