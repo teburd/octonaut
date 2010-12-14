@@ -57,3 +57,26 @@ void octo_http_message_destroy(octo_http_message *message)
 
     octo_buffer_destroy(&message->body);
 }
+
+octo_http_message * octo_http_message_alloc()
+{
+    return malloc(sizeof(octo_http_message));
+}
+
+void octo_http_message_free(octo_http_message *message)
+{
+    free(message);
+}
+
+octo_http_message * octo_http_message_new()
+{
+    octo_http_message *message = octo_http_message_alloc();
+    octo_http_message_init(message);
+    return message;
+}
+
+void octo_http_message_delete(octo_http_message *message)
+{
+    octo_http_message_destroy(message);
+    octo_http_message_free(message);
+}

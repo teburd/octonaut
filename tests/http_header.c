@@ -20,11 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef TEST_LOGGER_H
-#define TEST_LOGGER_H
-
+#include <octonaut/http_header.h>
 #include <check.h>
 
-TCase * octo_logger_tcase();
+START_TEST (test_octo_http_header_new_delete)
+{
+    octo_http_header *header = octo_http_header_new();
+    octo_http_header_delete(header);
+}
+END_TEST
 
-#endif
+TCase* octo_http_header_tcase()
+{
+    TCase* tc_octo_http_header = tcase_create("octo_http_header");
+    tcase_add_test(tc_octo_http_header, test_octo_http_header_new_delete);
+    return tc_octo_http_header;
+}
+
+

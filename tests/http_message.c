@@ -20,11 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef TEST_LOGGER_H
-#define TEST_LOGGER_H
-
+#include <octonaut/http_message.h>
 #include <check.h>
 
-TCase * octo_logger_tcase();
+START_TEST (test_octo_http_message_new_delete)
+{
+    octo_http_message *message = octo_http_message_new();
+    octo_http_message_delete(message);
+}
+END_TEST
 
-#endif
+TCase* octo_http_message_tcase()
+{
+    TCase* tc_octo_http_message = tcase_create("octo_http_message");
+    tcase_add_test(tc_octo_http_message, test_octo_http_message_new_delete);
+    return tc_octo_http_message;
+}
+
+

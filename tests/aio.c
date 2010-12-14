@@ -23,7 +23,9 @@
 #include <octonaut/aio.h>
 #include <ev.h>
 #include <check.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 START_TEST (test_octo_aio_create)
 {

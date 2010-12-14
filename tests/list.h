@@ -20,11 +20,11 @@
  * THE SOFTWARE.
  */
 
-#ifndef TEST_AIO_H
-#define TEST_AIO_H
+#ifndef TEST_LIST_H
+#define TEST_LIST_H
 
 #include <check.h>
 
-TCase * octo_aio_tcase();
+TCase * octo_list_tcase();
 
 #endif

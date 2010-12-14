@@ -20,11 +20,11 @@
  * THE SOFTWARE.
  */
 
-#ifndef TEST_LOGGER_H
-#define TEST_LOGGER_H
+#ifndef TEST_HTTP_HEADER_H
+#define TEST_HTTP_HEADER_H
 
 #include <check.h>
 
-TCase * octo_logger_tcase();
+TCase * octo_http_header_tcase();
 
 #endif
