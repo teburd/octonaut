@@ -51,6 +51,12 @@ START_TEST (test_octo_hash_put_get_remove)
     fail_unless(entry == &(s2.hash),
         "hash table failed to retrieve correct entry");
 
+    bool has = false;
+    has = octo_hash_has(&hash, &key, sizeof(key));
+
+    fail_unless(has == true,
+        "hash table failed to find correct entry");
+
     key = 3;
     entry = octo_hash_get(&hash, &key, sizeof(key));
 
@@ -63,6 +69,8 @@ END_TEST
 
 START_TEST (test_octo_hash_chaining)
 {
+    bool putted = false;
+
     octo_hash hash;
 
     test_hash_struct s1 = 
@@ -75,14 +83,29 @@ START_TEST (test_octo_hash_chaining)
         {
             .value = 2,
         };
-
     octo_hash_entry_init(&s2.hash, &s2.value, sizeof(s2.value));
+
+    test_hash_struct s3 = 
+        {
+            .value = 3,
+        };
+    octo_hash_entry_init(&s3.hash, &s3.value, sizeof(s3.value));
+
 
     octo_hash_init(&hash, octo_default_hash_function, 0, 1);
 
-    octo_hash_put(&hash, &s1.hash);
-    octo_hash_put(&hash, &s2.hash);
-    
+    putted = octo_hash_put(&hash, &s1.hash);
+    fail_unless(putted == true,
+        "put should succeed");
+ 
+    putted = octo_hash_put(&hash, &s2.hash);
+    fail_unless(putted == true,
+        "put should succeed");
+ 
+    putted = octo_hash_put(&hash, &s3.hash);
+    fail_unless(putted == true,
+        "put should succeed");
+
     uint32_t key = 1;
     octo_hash_entry *entry = octo_hash_get(&hash, &key, sizeof(key));
 
@@ -101,10 +124,10 @@ START_TEST (test_octo_hash_chaining)
     fail_unless(entry == &(s2.hash),
         "hash table failed to retrieve correct entry");
 
-    fail_unless(octo_hash_size(&hash) == 1,
+    fail_unless(octo_hash_size(&hash) == 2,
         "hash table size is incorrect");
 
-    key = 3;
+    key = -1;
     entry = octo_hash_get(&hash, &key, sizeof(key));
 
     fail_unless(entry == NULL,
@@ -116,8 +139,13 @@ START_TEST (test_octo_hash_chaining)
     fail_unless(entry == &(s1.hash),
         "hash table failed to retrieve correct entry");
 
-    fail_unless(octo_hash_size(&hash) == 0,
+    fail_unless(octo_hash_size(&hash) == 1,
         "hash table size is incorrect");
+
+    putted = octo_hash_put(&hash, &s3.hash);
+
+    fail_unless(putted == false,
+        "double put of the same key should result in failing to put");
 
     octo_hash_destroy(&hash);
 }
@@ -145,14 +173,22 @@ START_TEST (test_octo_hash_strings)
         };
     octo_hash_entry_init(&s2.hash, s2.key, strlen(s2.key));
 
+    test_hash_sstring s3 = 
+        {
+            .key = "Jack",
+        };
+    octo_hash_entry_init(&s3.hash, s3.key, strlen(s3.key));
+
     octo_hash_init(&hash, octo_default_hash_function, 0, 1);
 
     octo_hash_put(&hash, &s1.hash);
     octo_hash_put(&hash, &s2.hash);
+    octo_hash_put(&hash, &s3.hash);
     
     char king[] = "King";
     char queen[] = "Queen";
     char jack[] = "Jack";
+    char ace[] = "Ace";
 
     octo_hash_entry *entry = octo_hash_get(&hash, queen, strlen(queen)); 
 
@@ -164,6 +200,19 @@ START_TEST (test_octo_hash_strings)
     fail_unless(entry == &(s2.hash),
         "hash table failed to retrieve correct entry");
 
+    entry = octo_hash_pop(&hash, queen, strlen(queen));
+
+    fail_unless(entry == &(s1.hash),
+        "hash table failed to retrieve correct entry");
+
+    fail_unless(octo_hash_size(&hash) == 2,
+        "hash table size is incorrect");
+
+    entry = octo_hash_get(&hash, ace, strlen(ace));
+
+    fail_unless(entry == NULL,
+        "hash table failed to retrieve correct entry");
+
     entry = octo_hash_pop(&hash, king, strlen(king));
 
     fail_unless(entry == &(s2.hash),
@@ -172,17 +221,12 @@ START_TEST (test_octo_hash_strings)
     fail_unless(octo_hash_size(&hash) == 1,
         "hash table size is incorrect");
 
-    entry = octo_hash_get(&hash, jack, strlen(jack));
+    entry = octo_hash_pop(&hash, king, strlen(king));
 
     fail_unless(entry == NULL,
-        "hash table failed to retrieve correct entry");
+        "hash table failed to retrieve NULL entry");
 
-    entry = octo_hash_pop(&hash, queen, strlen(queen));
-
-    fail_unless(entry == &(s1.hash),
-        "hash table failed to retrieve correct entry");
-
-    fail_unless(octo_hash_size(&hash) == 0,
+    fail_unless(octo_hash_size(&hash) == 1,
         "hash table size is incorrect");
 
     octo_hash_destroy(&hash);
