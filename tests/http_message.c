@@ -21,7 +21,27 @@
  */
 
 #include <octonaut/http_message.h>
+#include <octonaut/http_header.h>
 #include <check.h>
+
+typedef struct test_header
+{
+    char *field;
+    char *value;
+} test_header;
+
+static test_header test_headers[10] = {
+    {"Content-Length", "100"},
+    {"Content-Type", "text/event-stream"},
+    {"Cache-Control", "no-cache"},
+    {"Accept", "text/plain"},
+    {"Accept-Encoding", "gzip"},
+    {"Accept-Language", "en"},
+    {"Allow", "GET, HEAD, PUT, POST"},
+    {"Connection", "close"},
+    {"From", "test@octonaut.com"},
+    {"Host", "test.octonaut.com"}
+};
 
 START_TEST (test_octo_http_message_new_delete)
 {
@@ -30,10 +50,37 @@ START_TEST (test_octo_http_message_new_delete)
 }
 END_TEST
 
+START_TEST (test_octo_http_message_add_headers)
+{
+    octo_http_message *message = octo_http_message_new();
+    octo_http_header *headers[10];
+
+    for(int i = 0; i < 10; ++i)
+    {
+        headers[i] = octo_http_header_new();
+        octo_buffer_write(&headers[i]->field, test_headers[i].field,
+            strlen(test_headers[i].field));
+        octo_buffer_write(&headers[i]->value, test_headers[i].value,
+            strlen(test_headers[i].value));
+
+        octo_http_message_add_header(message, headers[i]);
+    }
+
+    for(int i = 0; i < 10; ++i)
+    {
+        octo_http_header_delete(headers[i]);
+    }
+
+    octo_http_message_delete(message);
+}
+END_TEST
+
+
 TCase* octo_http_message_tcase()
 {
     TCase* tc_octo_http_message = tcase_create("octo_http_message");
     tcase_add_test(tc_octo_http_message, test_octo_http_message_new_delete);
+    tcase_add_test(tc_octo_http_message, test_octo_http_message_add_headers);
     return tc_octo_http_message;
 }
 

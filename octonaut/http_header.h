@@ -32,10 +32,14 @@
  */
 typedef struct octo_http_header
 {
+    /* part of two header containers */
     octo_hash_entry header_hash;
     octo_list header_list;
+
+    /* field and value pair */
     octo_buffer field;
     octo_buffer value;
+
 } octo_http_header;
 
 /**

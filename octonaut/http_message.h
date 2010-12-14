@@ -38,6 +38,7 @@ typedef enum http_method octo_http_method;
  */
 typedef struct octo_http_message
 {
+    /* part of a queue of messages to be handled */
     octo_list message_queue;
 
     octo_http_method method; 
@@ -47,7 +48,6 @@ typedef struct octo_http_message
     int http_minor_version;
     octo_hash headers;
     octo_buffer body;
-
 } octo_http_message;
 
 /**

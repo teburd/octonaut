@@ -47,10 +47,11 @@ void octo_http_message_destroy(octo_http_message *message)
 
     /*
     octo_hash_iterator iter;
-    octo_http_header *header = octo_hash_iterator_init(&message->headers, &iter);
+    octo_http_header *header = octo_hash_iter(&message->headers, &iter);
     do {
         octo_http_header_free(header);
-    } while(header = octo_hash_iterator_next(iter, octo_http_header, header_hash))
+        octo_hash_iternext(iter);
+    } while(header)
     */
 
     octo_hash_destroy(&message->headers);
@@ -80,3 +81,9 @@ void octo_http_message_delete(octo_http_message *message)
     octo_http_message_destroy(message);
     octo_http_message_free(message);
 }
+
+void octo_http_message_add_header(octo_http_message *message, octo_http_header *header)
+{
+    octo_hash_put(&message->headers, &header->header_hash);
+}
+

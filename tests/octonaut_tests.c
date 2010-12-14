@@ -8,12 +8,9 @@
 #include "logger.h"
 #include "server.h"
 #include "http_header.h"
-
-/*
 #include "http_message.h"
 #include "http_request.h"
-#include "http_server.h"
-*/
+/*#include "http_server.h"*/
 
 
 Suite* octonaut_suite(void)
