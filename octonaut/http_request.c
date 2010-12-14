@@ -48,7 +48,6 @@ static int request_message_begin(http_parser *parser)
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_MESSAGE_BEGIN;
-    printf("message begin\n");
     return 0;
 }
 
@@ -57,7 +56,6 @@ static int request_path(http_parser *parser,
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_PATH;
-    printf("request path\n");
     return 0;
 }
 
@@ -66,7 +64,6 @@ static int request_query(http_parser *parser,
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_QUERY;
-    printf("request query\n");
     return 0;
 }
 
@@ -75,7 +72,6 @@ static int request_url(http_parser *parser,
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_URL;
-    printf("request url\n");
     return 0;
 }
 
@@ -84,7 +80,6 @@ static int request_fragment(http_parser *parser,
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_FRAGMENT;
-    printf("request fragment\n");
     return 0;
 }
 
@@ -93,7 +88,6 @@ static int request_header_field(http_parser *parser,
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_FIELD;
-    printf("request header field\n");
     return 0;
 }
 
@@ -102,7 +96,6 @@ static int request_header_value(http_parser *parser,
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_VALUE;
-    printf("request header value\n");
     return 0;
 }
 
@@ -111,7 +104,6 @@ static int request_headers_complete(http_parser *parser)
 
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_HEADERS_COMPLETE;
-    printf("request headers complete\n");
     return 0;
 }
 
@@ -120,13 +112,11 @@ static int request_body(http_parser *parser,
 {
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_BODY;
-    printf("request body\n");
     return 0;
 }
 
 static int request_message_complete(http_parser *parser)
 {
-    printf("request message complete\n");
     octo_http_request *request = ptr_offset(parser, octo_http_request, parser);
     request->parser_state = PARSER_MESSAGE_COMPLETE;
     return 0;
