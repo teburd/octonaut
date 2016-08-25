@@ -8,3 +8,5 @@ coverage
 *.swp
 *.pt.py
 *~
+*.o
+*.a
